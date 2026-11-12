@@ -22,8 +22,9 @@ targets:
       - path: YuyueAssistant/Resources/gallery
         type: folder
         buildPhase: resources
-    info:
-      path: YuyueAssistant/Info.plist
+    # 注意：这里不能写 info: {path: ...}。XcodeGen 会用自动生成的空壳 plist
+    # 覆盖掉仓库里手写的 Info.plist，导致 CFBundleDisplayName / UILaunchScreen
+    # 等自定义键全部丢失。改用下面的 INFOPLIST_FILE 让它直接消费现成文件。
     entitlements:
       path: Entitlements.plist
     settings:
