@@ -1,0 +1,50 @@
+name: YuyueAssistant
+options:
+  bundleIdPrefix: com.kk521.yuyue
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15"
+  generateEmptyDirectories: true
+
+targets:
+  YuyueAssistant:
+    type: application
+    platform: iOS
+    sources:
+      - path: YuyueAssistant
+        excludes:
+          - "Resources/**"
+          - "Info.plist"
+    resources:
+      - path: YuyueAssistant/Resources/www
+        type: folder
+        buildPhase: resources
+      - path: YuyueAssistant/Resources/gallery
+        type: folder
+        buildPhase: resources
+    info:
+      path: YuyueAssistant/Info.plist
+    entitlements:
+      path: Entitlements.plist
+    settings:
+      base:
+        PRODUCT_NAME: YuyueAssistant
+        PRODUCT_BUNDLE_IDENTIFIER: com.kk521.yuyue.assistant
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGN_IDENTITY: ""
+        DEVELOPMENT_TEAM: ""
+        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        GENERATE_INFOPLIST_FILE: "NO"
+        INFOPLIST_FILE: YuyueAssistant/Info.plist
+
+schemes:
+  YuyueAssistant:
+    build:
+      targets:
+        YuyueAssistant: all
+    run:
+      config: Release
+    archive:
+      config: Release

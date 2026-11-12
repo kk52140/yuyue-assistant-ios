@@ -1,0 +1,58 @@
+name: 构建愉悦助手 IPA
+
+# 在 Windows 上也能免费拿到 arm64 iOS IPA：把工程推到 GitHub，本工作流用
+# GitHub 提供的 macOS runner + Xcode 编译，构建完从 Actions 的 Artifacts 下载 IPA。
+# 手动触发：仓库 → Actions → 构建愉悦助手 IPA → Run workflow
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'YuyueAssistant/**'
+      - 'project.yml'
+      - 'Entitlements.plist'
+      - 'build_ipa.sh'
+      - '.github/workflows/build-ipa.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+
+      - name: 选择 Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: 环境信息
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          swift --version
+
+      - name: 安装 XcodeGen（可选，加速且更规范）
+        run: |
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen || echo "XcodeGen 安装失败，脚本将回退到 swiftc 直编"
+          fi
+
+      - name: 构建 IPA
+        run: |
+          chmod +x build_ipa.sh
+          ./build_ipa.sh
+
+      - name: 校验产物
+        run: |
+          ls -lh 愉悦助手.ipa
+          unzip -l 愉悦助手.ipa | grep -E 'YuyueAssistant$|Info.plist|www/index.html|gallery/' | head -20
+          file build/Payload/YuyueAssistant.app/YuyueAssistant
+
+      - name: 上传 IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: 愉悦助手-IPA
+          path: 愉悦助手.ipa
+          if-no-files-found: error
+          retention-days: 30

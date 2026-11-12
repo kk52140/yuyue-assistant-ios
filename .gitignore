@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# 构建产物
+*.ipa
+*.app
+Payload/
+build_ipa_xcodegen/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# 临时文件
+*.log
+*.tmp

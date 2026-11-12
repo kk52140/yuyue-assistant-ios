@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>愉悦助手</title>
+<style>
+:root{
+  --bg:#0e1219; --surface:#161c26; --surface2:#1d2531; --line:#2a3441;
+  --text:#e8edf4; --muted:#8b98aa; --accent:#4c9aff; --accent2:#2f6fd0;
+  --ok:#3ecf8e; --warn:#e5a94b; --danger:#ef6b6b; --chip:#243040;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;
+  font-size:14px;-webkit-font-smoothing:antialiased}
+body{padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 24px)}
+h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.5px}
+h2{font-size:14px;margin:0 0 10px;font-weight:600;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:3px;height:14px;border-radius:2px;background:var(--accent)}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.badge{font-size:11.5px;padding:4px 9px;border-radius:20px;background:var(--chip);color:var(--muted)}
+.badge.on{background:rgba(62,207,142,.14);color:var(--ok)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex-shrink:0}
+input[type=text],input[type=password],input[type=number],select{
+  background:var(--surface2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:9px 10px;font-size:14px;outline:none;min-height:38px}
+input:focus,select:focus{border-color:var(--accent)}
+input{flex:1;min-width:0}
+button{background:var(--surface2);border:1px solid var(--line);color:var(--text);
+  border-radius:8px;padding:9px 13px;font-size:13.5px;font-weight:500;min-height:38px}
+button:active{opacity:.65}
+button:disabled{opacity:.45}
+button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+button.ok{background:rgba(62,207,142,.16);border-color:rgba(62,207,142,.4);color:var(--ok)}
+button.danger{background:rgba(239,107,107,.14);border-color:rgba(239,107,107,.4);color:var(--danger)}
+button.ghost{background:transparent}
+button.sm{padding:6px 10px;min-height:30px;font-size:12.5px}
+.muted{color:var(--muted);font-size:12px}
+.hint{color:var(--muted);font-size:11.5px;line-height:1.55;margin-top:8px}
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px;padding:4px;margin-bottom:12px}
+.tab{flex:1;text-align:center;padding:9px 4px;border-radius:7px;font-size:13px;color:var(--muted)}
+.tab.active{background:var(--accent2);color:#fff;font-weight:600}
+.pane{display:none}.pane.show{display:block}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:82px}
+.seg button.sel{background:rgba(76,154,255,.18);border-color:var(--accent);color:#9ec5ff}
+.task{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .cb{width:20px;height:20px;flex:0 0 20px;accent-color:var(--accent);margin-top:2px}
+.task .info{flex:1;min-width:0}
+.task .nm{font-size:13.5px;line-height:1.4;word-break:break-all}
+.task .meta{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+.tag{display:inline-block;font-size:10.5px;padding:2px 6px;border-radius:4px;margin-right:5px}
+.tag.today{background:rgba(76,154,255,.18);color:#9ec5ff}
+.tag.overdue{background:rgba(229,169,75,.16);color:var(--warn)}
+.tag.future{background:rgba(139,152,170,.16);color:var(--muted)}
+.tag.done{background:rgba(62,207,142,.16);color:var(--ok)}
+.bar{background:var(--surface2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;margin-bottom:10px;font-size:12.5px;line-height:1.6}
+.progress{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0}
+.progress>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.cd{font-size:13px;color:var(--warn);font-weight:600}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gi{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface2)}
+.gi img{width:100%;height:88px;object-fit:cover;display:block}
+.gi .cap{font-size:10px;color:var(--muted);padding:4px 5px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.gi .del{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;
+  background:rgba(0,0,0,.65);color:#fff;border:0;font-size:14px;line-height:1;padding:0;min-height:0}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:12.5px;line-height:1.7}
+.foot{display:flex;gap:8px;margin-top:10px}
+.foot button{flex:1}
+label.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+label.chk input{width:16px;height:16px;flex:0 0 16px;accent-color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);
+  transform:translateX(-50%);background:#000c;color:#fff;padding:10px 16px;
+  border-radius:20px;font-size:12.5px;max-width:86%;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+.toast.on{opacity:1}
+.stopped{position:fixed;inset:0;background:#0b0f15f2;z-index:200;display:none;
+  align-items:center;justify-content:center;padding:24px}
+.stopped .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:24px;text-align:center;max-width:320px}
+.stopped h2{justify-content:center}
+.boot{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;
+  align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.boot .dot{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>愉悦助手</h1>
+  <span class="badge" id="loginBadge">未登录</span>
+</div>
+
+<!-- 启动校验浮层 -->
+<div class="boot" id="boot">
+  <div class="dot"></div><div class="muted">正在校验运行时密钥…</div>
+</div>
+<div class="stopped" id="stopped">
+  <div class="box"><h2>已停止使用</h2>
+    <p class="muted" id="stoppedMsg">校验密钥不匹配或读取失败。</p>
+    <button class="primary" onclick="retryGuard()">重试校验</button></div>
+</div>
+
+<!-- 登录 -->
+<div class="card" id="loginCard">
+  <h2>账号登录</h2>
+  <div class="row" style="margin-bottom:8px">
+    <input type="text" id="user" placeholder="账号" autocomplete="username" autocapitalize="off">
+  </div>
+  <div class="row" style="margin-bottom:8px">
+    <input type="password" id="pwd" placeholder="密码" autocomplete="current-password">
+  </div>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="remember" checked> 记住账号密码</label>
+    <span style="flex:1"></span>
+    <button class="primary" onclick="doLogin()">登录</button>
+    <button class="ghost sm" onclick="doLogout()">退出</button>
+  </div>
+  <div class="hint">账号密码仅保存在本机 App 内（UserDefaults），不上传。</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-p="today" onclick="switchTab('today')">今日任务</div>
+  <div class="tab" data-p="overdue" onclick="switchTab('overdue')">逾期任务</div>
+  <div class="tab" data-p="gallery" onclick="switchTab('gallery')">图库</div>
+  <div class="tab" data-p="setting" onclick="switchTab('setting')">设置</div>
+</div>
+
+<!-- 今日 / 逾期共用查询区 -->
+<div class="pane show" id="pane-today"><div id="taskBoxToday"></div></div>
+<div class="pane" id="pane-overdue"><div id="taskBoxOverdue"></div></div>
+
+<!-- 图库 -->
+<div class="pane" id="pane-gallery">
+  <div class="card">
+    <h2>软件图库 <span class="muted" id="galCount">0 张</span></h2>
+    <div class="row" style="margin-bottom:10px">
+      <button class="primary sm" onclick="document.getElementById('fileInput').click()">＋ 添加照片</button>
+      <button class="sm" onclick="loadGallery()">刷新</button>
+      <button class="ghost sm" onclick="restoreGallery()">恢复内置图</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="addGalleryFiles(this)">
+    <div class="gal" id="galGrid"></div>
+    <div class="empty" id="galEmpty">图库为空</div>
+    <div class="hint">打包配图：直接往 IPA 工程 <b>Resources/gallery/</b> 目录增删 jpg/png 再重新打包即可替换初始图库。<br>
+      日常换图：用上面的「添加照片」从相册导入，点缩略图右上角 × 删除；内置图可「恢复内置图」找回。<br>
+      也可在 iOS「文件」App 里直接操作本 App 的 Documents/gallery 目录。</div>
+  </div>
+  <div class="card">
+    <h2>本次提交用图</h2>
+    <div class="seg" style="margin-bottom:8px">
+      <button id="useAll" class="sel" onclick="setUseMode('all')">图库全部</button>
+      <button id="usePick" onclick="setUseMode('pick')">手动挑图</button>
+      <button id="useNone" onclick="setUseMode('none')">不配图</button>
+    </div>
+    <div class="muted" id="useInfo">使用图库全部图片</div>
+    <div class="gal" id="pickGrid" style="margin-top:10px;display:none"></div>
+    <div class="hint">提交前会按 App 口径自动缩到 412 宽、加姓名/日期水印、压成 JPEG q50。</div>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="pane" id="pane-setting">
+  <div class="card">
+    <h2>提交设置</h2>
+    <div class="row" style="margin-bottom:8px">
+      <span class="muted" style="width:76px">任务模式</span>
+      <select id="tmode" onchange="paintMode()" style="flex:1">
+        <option value="multiple">多次任务</option>
+        <option value="single">单次任务（即时）</option>
+      </select>
+    </div>
+    <div id="multiOpts">
+      <div class="row" style="margin-bottom:8px">
+        <span class="muted" style="width:76px">提交节奏</span>
+        <input type="number" id="pace" value="2" min="0" max="120" step="1">
+        <span class="muted">秒/条</span>
+      </div>
+    </div>
+    <div id="singleNote" class="hint" style="display:none">单次任务：立即提交，无时间选项、无列队等待。</div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted" style="width:76px">每项照片</span>
+      <select id="perDetail" style="flex:1">
+        <option value="1">1 张（推荐，最快）</option>
+        <option value="2">2 张</option>
+        <option value="3">3 张</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted" style="width:76px">完成时间</span>
+      <select id="timeMode" style="flex:1">
+        <option value="now">当前时刻</option>
+        <option value="plan">按计划日期当天</option>
+      </select>
+    </div>
+    <div class="hint">完成时间按 App 口径写入点位明细；水印日期取该时间所在日期。</div>
+  </div>
+  <div class="card">
+    <h2>运行时状态</h2>
+    <div class="muted" id="guardInfo">—</div>
+    <div class="row" style="margin-top:10px"><button class="sm" onclick="checkGuard()">重新校验</button>
+      <button class="ghost sm" onclick="clearCache()">清空任务缓存</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="core.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var S = { session:null, tab:'today', cache:{}, selected:{}, rows:{}, gal:[],
+          pick:new Set(), useMode:'all', busy:false, running:false, stop:false, cfg:{} };
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+var toastTimer=null;
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.className='toast on';
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.className='toast';},2600); }
+
+// ---- 原生桥 ----
+window.__yyDone = function(id,b64){ YY.nativeDone(id,b64); };
+YY.setBridge(function(action,payload,id){
+  var h = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.yy;
+  if(!h){ YY.nativeDone(id, YY.bytesToB64(YY.utf8Bytes(JSON.stringify({ok:false,error:'原生桥不可用'})))); return; }
+  h.postMessage({id:id,action:action,payload:payload});
+});
+function nc(a,p){ return YY.nativeCall(a,p||{}); }
+
+// ---- 配置（记住账号密码）----
+function loadCfg(){
+  return nc('configGet').then(function(r){
+    try{ S.cfg = r.value ? JSON.parse(r.value) : {}; }catch(e){ S.cfg={}; }
+    if(S.cfg.username){ $('user').value=S.cfg.username; }
+    if(S.cfg.password){ $('pwd').value=S.cfg.password; }
+    $('remember').checked = S.cfg.remember !== false;
+    $('pace').value = S.cfg.pace_sec==null?2:S.cfg.pace_sec;
+    $('tmode').value = S.cfg.task_mode||'multiple';
+    $('perDetail').value = String(S.cfg.per_detail||1);
+    $('timeMode').value = S.cfg.time_mode||'now';
+    paintMode();
+  }).catch(function(){ paintMode(); });
+}
+function saveCfg(){
+  S.cfg.username=$('user').value.trim();
+  S.cfg.password=$('remember').checked ? $('pwd').value : '';
+  S.cfg.remember=$('remember').checked;
+  S.cfg.pace_sec=Number($('pace').value)||0;
+  S.cfg.task_mode=$('tmode').value;
+  S.cfg.per_detail=Number($('perDetail').value)||1;
+  S.cfg.time_mode=$('timeMode').value;
+  return nc('configSet',{value:JSON.stringify(S.cfg)});
+}
+function paintMode(){
+  var single=$('tmode').value==='single';
+  $('multiOpts').style.display=single?'none':'block';
+  $('singleNote').style.display=single?'block':'none';
+}
+
+// ---- 登录 ----
+function doLogin(){
+  var u=$('user').value.trim(), p=$('pwd').value;
+  if(!u||!p){ toast('请输入账号和密码'); return; }
+  toast('正在登录…');
+  YY.login(u,p).then(function(s){
+    S.session=s;
+    $('loginBadge').textContent=s.trueName+' · 已登录';
+    $('loginBadge').className='badge on';
+    saveCfg().then(function(){ toast('登录成功 · 账号已记住'); });
+    // 登录后不自动拉取，手动选页签点查询
+  }).catch(function(e){ toast(e.message||'登录失败'); });
+}
+function doLogout(){
+  S.session=null; S.cache={}; S.selected={}; S.rows={};
+  $('loginBadge').textContent='未登录'; $('loginBadge').className='badge';
+  S.cfg.password=''; S.cfg.username='';
+  nc('configSet',{value:JSON.stringify(S.cfg)});
+  $('pwd').value=''; renderTasks(); toast('已退出');
+}
+function needLogin(){ if(!S.session){ toast('请先在顶部登录'); window.scrollTo(0,0); return false; } return true; }
+
+// ---- 页签 ----
+function switchTab(p){
+  S.tab=p;
+  var ts=document.querySelectorAll('.tab');
+  for(var i=0;i<ts.length;i++) ts[i].className='tab'+(ts[i].getAttribute('data-p')===p?' active':'');
+  var ps=document.querySelectorAll('.pane');
+  for(var j=0;j<ps.length;j++) ps[j].className='pane'+(ps[j].id==='pane-'+p?' show':'');
+  if(p==='gallery') loadGallery();
+  else if(p==='today'||p==='overdue') renderTasks();
+}
+
+// ---- 任务 ----
+function taskBoxHtml(scope){
+  var lbl = scope==='today'?'今日任务':'逾期任务';
+  return '<div class="card"><h2>'+lbl+'</h2>'+
+    '<div class="row" style="margin-bottom:8px">'+
+      '<select id="typ_'+scope+'" style="flex:1"><option value="inspect">设备巡检</option>'+
+      '<option value="upkeep">设备维保</option></select>'+
+      '<button class="primary sm" onclick="doFetch(\''+scope+'\')">查询'+lbl+'</button>'+
+      '<button class="sm" onclick="doRefresh(\''+scope+'\')">重扫</button>'+
+    '</div>'+
+    '<div class="row" style="margin-bottom:8px">'+
+      '<input type="text" id="kw_'+scope+'" placeholder="搜索任务名 / 编号 / 日期" oninput="renderTasks()">'+
+      '<button class="ghost sm" onclick="selAll(\''+scope+'\',true)">全选</button>'+
+      '<button class="ghost sm" onclick="selAll(\''+scope+'\',false)">清空</button>'+
+    '</div>'+
+    '<div class="bar" id="bar_'+scope+'">未查询。选择类型后点「查询'+lbl+'」。</div>'+
+    '<div id="list_'+scope+'"></div>'+
+    '<div class="foot"><button class="ok" onclick="doRun(\''+scope+'\')">完成选中任务</button>'+
+    '<button class="danger" onclick="stopRun()" id="stopBtn_'+scope+'" disabled>停止</button></div>'+
+    '</div>'+
+    '<div class="card"><h2>执行进度</h2>'+
+      '<div class="muted" id="prog_'+scope+'">—</div>'+
+      '<div class="cd" id="cd_'+scope+'"></div>'+
+      '<div class="progress"><i id="pbar_'+scope+'"></i></div>'+
+    '</div>';
+}
+$('taskBoxToday').innerHTML=taskBoxHtml('today');
+$('taskBoxOverdue').innerHTML=taskBoxHtml('overdue');
+
+function cacheKey(scope){ var t=$('typ_'+scope); return (t?t.value:'inspect')+'|'+YY.todayStr(); }
+
+function doFetch(scope){
+  if(!needLogin()) return;
+  var key=cacheKey(scope);
+  if(S.cache[key]){ renderTasks(); toast('命中缓存（扫描于 '+S.cache[key].fetchedAt+'），无需重扫'); return; }
+  doRefresh(scope);
+}
+function doRefresh(scope){
+  if(!needLogin()) return;
+  if(S.busy){ toast('正在扫描，请稍候'); return; }
+  S.busy=true;
+  var bar=$('bar_'+scope), typ=$('typ_'+scope).value, n=0;
+  bar.textContent='正在扫描全表…（任务多时首次较慢，结果会缓存）';
+  YY.fetchAll(S.session,typ,function(cnt,total){ n=cnt;
+    bar.textContent='正在扫描全表…已取 '+cnt+' 条'+(total?(' / 共约 '+total):'');
+  }).then(function(c){
+    S.cache[cacheKey(scope)]=c; S.busy=false;
+    renderTasks(); toast('扫描完成 · '+c.rows.length+' 条，已缓存');
+  }).catch(function(e){ S.busy=false;
+    bar.textContent='扫描失败：'+esc(e.message);
+    if(e.sessionExpired){ S.session=null; $('loginBadge').textContent='登录已失效';
+      $('loginBadge').className='badge'; }
+    toast(e.message); });
+}
+function clearCache(){ S.cache={}; toast('任务缓存已清空'); }
+
+var submittedSet={};
+function visibleRows(scope){
+  var key=cacheKey(scope), c=S.cache[key];
+  if(!c) return null;
+  var kw=$('kw_'+scope)?$('kw_'+scope).value:'';
+  // 已完成的任务从列表和计数里剔除，不再提示
+  var alive=c.rows.filter(function(r){ return !submittedSet[scope+'|'+r.taskId]; });
+  return YY.filterRows(alive,scope,kw);
+}
+function selKey(scope,id){ return scope+'|'+id; }
+function selAll(scope,on){
+  var rows=visibleRows(scope)||[];
+  rows.forEach(function(r){ if(on) S.selected[selKey(scope,r.taskId)]=r; else delete S.selected[selKey(scope,r.taskId)]; });
+  renderTasks();
+}
+function toggleSel(scope,id){
+  var k=selKey(scope,id);
+  if(S.selected[k]) delete S.selected[k];
+  else { var rows=visibleRows(scope)||[];
+    for(var i=0;i<rows.length;i++) if(rows[i].taskId===id){ S.selected[k]=rows[i]; break; } }
+  renderTasks();
+}
+function catTag(c){ var m={today:['今日','today'],overdue:['逾期','overdue'],
+  future:['未来','future'],unknown:['未识别','future']}; var x=m[c]||m.unknown;
+  return '<span class="tag '+x[1]+'">'+x[0]+'</span>'; }
+function renderTasks(){
+  ['today','overdue'].forEach(function(scope){
+    var rows=visibleRows(scope), box=$('list_'+scope), bar=$('bar_'+scope);
+    if(!rows){ box.innerHTML='<div class="empty">尚未查询。点上方「查询」拉取任务。</div>'; return; }
+    var selN=0, html='';
+    rows.forEach(function(r){
+      var k=selKey(scope,r.taskId), on=!!S.selected[k];
+      if(on) selN++;
+      html+='<div class="task"><input class="cb" type="checkbox" '+(on?'checked':'')+
+        ' onchange="toggleSel(\''+scope+'\',\''+esc(r.taskId)+'\')">'+
+        '<div class="info"><div class="nm">'+catTag(r.category)+esc(r.name||'(无名称)')+'</div>'+
+        '<div class="meta">'+esc(r.planStart)+' · '+esc(r.taskId)+
+        (r.delay!==''&&r.delay!=null?(' · 逾期 '+esc(r.delay)+' 天'):'')+'</div></div></div>';
+    });
+    box.innerHTML = rows.length?html:'<div class="empty">该范围内没有任务</div>';
+    bar.innerHTML='<b>'+(scope==='today'?'今日任务':'逾期任务')+'</b>：共 '+rows.length+
+      ' 条 · 已选 <b>'+selN+'</b> 条 · 扫描 '+S.cache[cacheKey(scope)].rows.length+
+      ' 条 <span class="muted">（'+esc(S.cache[cacheKey(scope)].fetchedAt)+'）</span>';
+  });
+}
+
+// ---- 图库 ----
+function loadGallery(){
+  return nc('galleryList').then(function(r){
+    if(!r.ok){ toast(r.error||'图库读取失败'); return; }
+    S.gal=r.items||[];
+    $('galCount').textContent=S.gal.length+' 张'+(r.hiddenCount?(' · 隐藏 '+r.hiddenCount):'');
+    var grid=$('galGrid'), html='';
+    S.gal.forEach(function(it){
+      html+='<div class="gi"><button class="del" onclick="delGal(\''+esc(it.id)+'\')">×</button>'+
+        '<img id="gi_'+esc(it.id).replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
+        '<div class="cap">'+esc(it.name)+(it.builtin?'':' · 新增')+'</div></div>';
+    });
+    grid.innerHTML=html;
+    $('galEmpty').style.display=S.gal.length?'none':'block';
+    // 逐张取缩略图（base64 直接作为 dataURL）
+    S.gal.forEach(function(it){
+      thumb(it.id).then(function(url){
+        var el=$('gi_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_'));
+        if(el&&url) el.src=url;
+      });
+    });
+    renderPick();
+  }).catch(function(e){ toast(e.message); });
+}
+var thumbCache={};
+function thumb(id){
+  if(thumbCache[id]) return Promise.resolve(thumbCache[id]);
+  return nc('galleryRead',{id:id}).then(function(r){
+    if(!r.ok) return null;
+    var u='data:'+r.mime+';base64,'+r.dataB64; thumbCache[id]=u; return u;
+  }).catch(function(){ return null; });
+}
+function addGalleryFiles(input){
+  var files=Array.from(input.files||[]); input.value='';
+  if(!files.length) return;
+  var left=files.length, ok=0;
+  toast('正在导入 '+files.length+' 张…');
+  files.forEach(function(f){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var b64=String(fr.result).split(',')[1]||'';
+      nc('galleryAdd',{name:f.name,dataB64:b64}).then(function(r){
+        if(!r.ok) toast(r.error||'导入失败'); else ok++;
+      }).catch(function(){}).then(function(){
+        if(--left<=0){ toast('已导入 '+ok+' 张'); loadGallery(); }
+      });
+    };
+    fr.onerror=function(){ if(--left<=0){ toast('已导入 '+ok+' 张'); loadGallery(); } };
+    fr.readAsDataURL(f);
+  });
+}
+function delGal(id){
+  nc('galleryDelete',{id:id}).then(function(r){
+    if(!r.ok){ toast(r.error); return; }
+    delete thumbCache[id]; S.pick.delete(id);
+    toast(r.hidden?'已从列表移除（可用「恢复内置图」找回）':'已删除');
+    loadGallery();
+  });
+}
+function restoreGallery(){ nc('galleryRestore').then(function(){ toast('内置图已恢复'); loadGallery(); }); }
+function setUseMode(m){
+  S.useMode=m;
+  ['all','pick','none'].forEach(function(x){ $('use'+x.charAt(0).toUpperCase()+x.slice(1)).className=(x===m?'sel':''); });
+  $('useInfo').textContent = m==='all'?'使用图库全部图片':(m==='none'?'本次提交不配图':'在下面手动勾选图片');
+  $('pickGrid').style.display = m==='pick'?'grid':'none';
+  renderPick();
+}
+function renderPick(){
+  if(S.useMode!=='pick') return;
+  var html='';
+  S.gal.forEach(function(it){
+    var on=S.pick.has(it.id);
+    html+='<div class="gi" onclick="togglePick(\''+esc(it.id)+'\')" style="outline:'+(on?'2px solid var(--accent)':'none')+'">'+
+      '<img id="pk_'+esc(it.id).replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
+      '<div class="cap">'+(on?'✓ ':'')+esc(it.name)+'</div></div>';
+  });
+  $('pickGrid').innerHTML=html||'<div class="empty">图库为空</div>';
+  S.gal.forEach(function(it){ thumb(it.id).then(function(u){
+    var el=$('pk_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_')); if(el&&u) el.src=u; }); });
+}
+function togglePick(id){ if(S.pick.has(id)) S.pick.delete(id); else S.pick.add(id); renderPick(); }
+
+// ---- 照片准备（水印 + 压缩）----
+function preparePhotos(when){
+  if(S.useMode==='none') return Promise.resolve([]);
+  var ids = S.useMode==='pick' ? Array.from(S.pick) : S.gal.map(function(x){return x.id;});
+  if(!ids.length) return Promise.resolve([]);
+  var name=S.session?S.session.trueName:'';
+  return Promise.all(ids.map(function(id){
+    return nc('galleryRead',{id:id}).then(function(r){
+      if(!r.ok) return null;
+      return YY.prepPhoto('data:'+r.mime+';base64,'+r.dataB64,name,when,Image,document)
+        .then(function(dataUrl){
+          if(!dataUrl) return null;
+          var b64=String(dataUrl).split(',')[1]||'';
+          return {name:r.name,data:YY.b64ToBytes(b64),mime:'image/jpeg'};
+        });
+    }).catch(function(){ return null; });
+  })).then(function(a){ return a.filter(Boolean); });
+}
+
+// ---- 执行 ----
+function planFinish(r){
+  if($('timeMode').value==='plan'){
+    var d=YY.planDay(r.planStart);
+    if(d) return d+' 09:00:00';
+  }
+  return YY.nowStr();
+}
+function sleep(ms){ return new Promise(function(res){ setTimeout(res,ms); }); }
+function doRun(scope){
+  if(!needLogin()) return;
+  if(S.running){ toast('已有任务在执行'); return; }
+  var items=Object.keys(S.selected).filter(function(k){return k.indexOf(scope+'|')===0;})
+    .map(function(k){return S.selected[k];});
+  if(!items.length){ toast('请先勾选任务'); return; }
+  var single=$('tmode').value==='single';
+  var pace=single?0:(Number($('pace').value)||0);
+  var per=Number($('perDetail').value)||1;
+  if(!confirm('确认完成 '+items.length+' 条'+(scope==='today'?'今日':'逾期')+'任务？'+
+    (single?'（单次任务 · 即时执行）':'（间隔 '+pace+' 秒/条）'))){ return; }
+  S.running=true; S.stop=false;
+  ['today','overdue'].forEach(function(s){ $('stopBtn_'+s).disabled=false; });
+  var prog=$('prog_'+scope), cd=$('cd_'+scope), pbar=$('pbar_'+scope);
+  var done=0, fail=0, i=0;
+  prog.textContent='准备中…';
+  function tick(msg){
+    prog.textContent=msg+' · 成功 '+done+' / 失败 '+fail+' / 共 '+items.length;
+    pbar.style.width=Math.round((done+fail)/items.length*100)+'%';
+  }
+  function loop(){
+    if(S.stop||i>=items.length){ finish(); return; }
+    var r=items[i], idx=i+1;
+    if(idx>1 && !single && pace>0){
+      var left=pace;
+      var cdTimer=setInterval(function(){
+        if(S.stop){ clearInterval(cdTimer); cd.textContent=''; finish(); return; }
+        left-=0.25;
+        cd.textContent='下一个任务：'+Math.max(0,left).toFixed(1)+' 秒后 · 已列队 '+(items.length-idx+1)+' 条';
+        if(left<=0){ clearInterval(cdTimer); cd.textContent=''; go(); }
+      },250);
+      tick('等待列队节奏 · 第 '+idx+'/'+items.length+' 条');
+      return; // 倒计时结束后 go()
+    }
+    go();
+    function go(){
+      if(S.stop){ finish(); return; }
+      tick('正在完成第 '+idx+'/'+items.length+' 条 · '+r.taskId);
+      var when=planFinish(r);
+      preparePhotos(when).then(function(photos){
+        return YY.submitOne(S.session,$('typ_'+scope).value,r.taskId,when,photos,per);
+      }).then(function(res){
+        if(res.ok){ done++; submittedSet[scope+'|'+r.taskId]=true; }
+        else { fail++; toast('第 '+idx+' 条失败：'+esc(JSON.stringify(res.resp).slice(0,90))); }
+        delete S.selected[selKey(scope,r.taskId)];
+        i++; tick('已完成第 '+idx+' 条');
+        loop();
+      }).catch(function(e){
+        fail++; i++;
+        if(e.sessionExpired){ S.session=null; $('loginBadge').textContent='登录已失效'; $('loginBadge').className='badge'; }
+        toast('第 '+idx+' 条失败：'+esc(e.message));
+        tick('第 '+idx+' 条失败'); loop();
+      });
+    }
+  }
+  function finish(){
+    var stopped=S.stop, remain=items.length-done-fail;
+    S.running=false; cd.textContent='';
+    ['today','overdue'].forEach(function(s){ $('stopBtn_'+s).disabled=true; });
+    prog.textContent=(stopped
+      ? ('已手动停止：成功 '+done+'、失败 '+fail+'，剩余 '+remain+' 条未提交')
+      : ('完成：成功 '+done+'、失败 '+fail));
+    pbar.style.width='100%';
+    renderTasks();
+    toast(stopped?'已停止':'执行完成');
+  }
+  loop();
+}
+function stopRun(){ if(!S.running) return; S.stop=true; toast('正在停止…'); }
+
+// ---- 校验 ----
+function checkGuard(){
+  return nc('guard').then(function(r){
+    $('guardInfo').textContent=r.ok?'校验通过 · 提交接口可用':('未通过：'+(r.reason||'未知'));
+    $('boot').style.display='none';
+    $('stopped').style.display=r.ok?'none':'flex';
+    if(!r.ok) $('stoppedMsg').textContent=r.reason||'校验密钥不匹配或读取失败。';
+    return r;
+  }).catch(function(e){
+    $('boot').style.display='none';
+    $('guardInfo').textContent='校验异常：'+e.message; return {ok:false};
+  });
+}
+function retryGuard(){ $('stopped').style.display='none'; $('boot').style.display='flex'; checkGuard(); }
+
+// ---- 启动 ----
+loadCfg().then(function(){ return checkGuard(); }).then(function(){
+  renderTasks(); loadGallery();
+});
+</script>
+</body>
+</html>
