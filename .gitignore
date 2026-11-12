@@ -25,3 +25,6 @@ node_modules/
 # 临时文件
 *.log
 *.tmp
+
+# XcodeGen 生成的工程（每次构建自动重建，不入库）
+*.xcodeproj/

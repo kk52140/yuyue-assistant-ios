@@ -48,7 +48,9 @@ TARGET="arm64-apple-ios15.0"
 # 优先用 XcodeGen + xcodebuild（自动处理 plist / 资源 / 签名）；没装就退回纯 swiftc。
 if command -v xcodegen >/dev/null 2>&1 && [ -f "$ROOT/project.yml" ]; then
   echo "使用 XcodeGen 生成工程"
-  xcodegen generate --spec "$ROOT/project.yml" --project "$ROOT/$APPNAME.xcodeproj" >/dev/null
+  # 注意：--project 接受的是「目录」，xcodegen 会在该目录下生成 <名字>.xcodeproj。
+  # 传 .xcodeproj 的完整路径会生成 <...>.xcodeproj/<...>.xcodeproj 的嵌套路径并报错。
+  ( cd "$ROOT" && xcodegen generate --spec project.yml --quiet )
   xcrun xcodebuild -quiet \
     -project "$ROOT/$APPNAME.xcodeproj" -scheme "$APPNAME" \
     -configuration Release -sdk iphoneos -derivedDataPath "$OUT/dd" \
