@@ -61,6 +61,11 @@ if command -v xcodegen >/dev/null 2>&1 && [ -f "$ROOT/project.yml" ]; then
   if [ -z "$BUILT" ]; then echo "错误：xcodebuild 未产出 .app" >&2; exit 1; fi
   rm -rf "$APP"
   cp -R "$BUILT" "$APP"
+  # XcodeGen 的 folder 引用在不同版本下对目录结构处理不一致（有时会摊平或干脆不拷），
+  # 这里统一显式覆盖拷贝，保证 App.app/www 与 App.app/gallery 的目录形态稳定。
+  rm -rf "$APP/www" "$APP/gallery"
+  cp -R "$ROOT/YuyueAssistant/Resources/www" "$APP/www"
+  cp -R "$ROOT/YuyueAssistant/Resources/gallery" "$APP/gallery"
 else
   echo "XcodeGen 未安装，使用 swiftc 直接编译（无需额外依赖）"
   xcrun --sdk iphoneos swiftc \
@@ -84,7 +89,12 @@ fi
 
 echo "=== 3/5 校验资源 ==="
 for f in "$APP/$APPNAME" "$APP/Info.plist" "$APP/www/index.html" "$APP/www/core.js"; do
-  if [ ! -f "$f" ]; then echo "错误：缺少 $f" >&2; exit 1; fi
+  if [ ! -f "$f" ]; then
+    echo "错误：缺少 $f" >&2
+    echo "--- .app 实际内容 ---" >&2
+    find "$APP" -maxdepth 2 >&2 || true
+    exit 1
+  fi
 done
 GAL_N=$(find "$APP/gallery" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | wc -l | tr -d ' ')
 echo "内置图库：$GAL_N 张"
