@@ -61,7 +61,7 @@ node verify/selftest_core.js
 node verify/selftest_guard.js
 ```
 
-## 三个已踩过的坑（改工程前务必看）
+## 四个已踩过的坑（改工程前务必看）
 
 1. **`project.yml` 里不能写 `info: {path: ...}`**
    XcodeGen 会用自动生成的空壳 plist 覆盖手写 `Info.plist`，导致
@@ -76,6 +76,10 @@ node verify/selftest_guard.js
 3. **XML 资源引用不可靠**
    XcodeGen 的 `type: folder` 有时不把 `www/`、`gallery/` 的目录结构带进 bundle，
    打包后 `App.app/www/index.html` 缺失会白屏。脚本已在构建后显式 `cp -R` 覆盖。
+
+4. **`Assets.xcassets` 必须放在 `sources` 而不是 `resources`**
+   放进 `resources` 只会被当成普通文件，`actool` 不执行，产物里没有 `Assets.car`，
+   图标集实际未生效。放到 `sources` 后才会编出 `Assets.car` 和 `AppIcon*.png`。
 
 ## 替换内置图库
 
