@@ -11,7 +11,9 @@
   var USERINFO_URL = HOST + '/sys/user/info';
   var LIST_INSPECT = '/equipment/inspectTask/taskList.jhtml';
   var LIST_UPKEEP = '/upkeep/task/getTaskList.jhtml';
-  var PAGE_SIZE = 50;
+  var PEOPLE_URL = '/sys/user/appUser';   // 项目人员检索（主机根路径，非 /yuzhouInterface）
+  var ORG_URL = '/sys/sysorg/list';
+  var PAGE_SIZE = 50;                     // 服务端单页拉取条数（与界面每页条数无关）
   var UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_4 like Mac OS X) AppleWebKit/605.1.15';
   var DEFAULT_URL = HOST + '/';
 
@@ -131,6 +133,10 @@
   function post(path, body, token, timeout) {
     return request('POST', BASE + path, headers(token), utf8Bytes(JSON.stringify(body)), timeout || 30);
   }
+  /** 主机根路径 GET：人员 / 组织接口不在 /yuzhouInterface 前缀下 */
+  function getRoot(path, params, token) {
+    return request('GET', HOST + path + '?' + qs(params), headers(token), null, 30);
+  }
 
   function deadCheck(r) {
     var code = r && r.code, msg = String((r && (r.msg || r.message)) || '');
@@ -189,6 +195,80 @@
       });
   }
 
+  /** 查项目人员。口径与 Windows 版 list_people() 一致：
+   *  GET /sys/user/appUser，三组参数依次尝试；返回 {ok,people,depts,error}。
+   *  查不到也能手填姓名，人员列表只是给 eiTaskUserName / checkUserName 和
+   *  代做时的 checkUser / checkUserName 提供准确姓名与 userId。
+   */
+  function listPeople(session, kw) {
+    kw = String(kw || '').trim();
+    if (kw === '*') kw = '';
+    var res = session.resCode || '';
+    var tries = [
+      { dataSourse: '', enableStatus: '1', information: kw, resCode: res },
+      { dataSourse: '', enableStatus: '', information: kw, resCode: res },
+      { information: kw, resCode: res }
+    ];
+    var last = '';
+
+    function parsePeople(d) {
+      var list = d;
+      if (d && !Array.isArray(d) && typeof d === 'object') {
+        list = d.list || d.content || d.records || [];
+      }
+      if (!Array.isArray(list)) return [];
+      var out = [];
+      list.forEach(function (x) {
+        if (!x || typeof x !== 'object') return;
+        var name = x.trueName || x.name || x.userName || x.realName || x.loginName || '';
+        var uid = x.id || x.userId || x.user_id || '';
+        var dept = x.department || x.deptName || x.orgName || x.resAreaName || x.roleName || '';
+        if (name) out.push({ id: String(uid), name: String(name), dept: String(dept) });
+      });
+      return out;
+    }
+
+    function orgLookup() {
+      return getRoot(ORG_URL, { type: 3 }, session.token).then(function (r) {
+        var d = (r && r.data) || [];
+        if (d && !Array.isArray(d) && typeof d === 'object') d = d.list || d.children || [];
+        if (!Array.isArray(d)) return [];
+        var names = [];
+        d.forEach(function (x) {
+          if (!x || typeof x !== 'object') return;
+          var nm = x.name || x.orgName || x.label || '';
+          if (nm) names.push(String(nm));
+        });
+        return names.slice(0, 60);
+      }).catch(function () { return []; });
+    }
+
+    function step(i) {
+      if (i >= tries.length) {
+        return orgLookup().then(function (depts) {
+          return { ok: false, people: [], depts: depts,
+                   error: last || '未查到人员，可直接手填姓名' };
+        });
+      }
+      return getRoot(PEOPLE_URL, tries[i], session.token).then(function (r) {
+        deadCheck(r);
+        if ([0, '0', 100, '100'].indexOf(r && r.code) >= 0) {
+          var ps = parsePeople(r.data);
+          if (ps.length) return orgLookup().then(function (depts) {
+            return { ok: true, people: ps, depts: depts, error: '' };
+          });
+        }
+        last = String((r && (r.msg || r.message)) || '').slice(0, 80);
+        return step(i + 1);
+      }).catch(function (e) {
+        if (e && e.sessionExpired) throw e;
+        last = String((e && e.message) || e).slice(0, 80);
+        return step(i + 1);
+      });
+    }
+    return step(0);
+  }
+
   // ---------------------------------------------------------------- 任务
 
   function planDay(s) {
@@ -223,14 +303,22 @@
     return d;
   }
 
-  function fetchPage(session, typ, page) {
+  /** person：'' = 本人 / 姓名 = 指定责任人 / '*' = 不加姓名过滤（全部责任人）。
+   *  与 Windows 版 fetch_page() 口径一致：巡检 eiTaskUserName，维保 checkUserName。
+   */
+  function fetchPage(session, typ, page, person) {
+    var who = String(person || '').trim();
     var params = {
       resCode: session.resCode, type: typ, pageSize: PAGE_SIZE,
       pageNumber: page, taskState: 2
     };
     var path = LIST_INSPECT;
-    if (typ === 'inspect') params.eiTaskUserName = session.trueName;
-    else path = LIST_UPKEEP;
+    if (typ === 'inspect') {
+      if (who !== '*') params.eiTaskUserName = who || session.trueName;
+    } else {
+      path = LIST_UPKEEP;
+      if (who && who !== '*') params.checkUserName = who;
+    }
 
     return get(path, params, session.token).then(function (r) {
       deadCheck(r);
@@ -253,10 +341,10 @@
   }
 
   /** 全量扫描一次，结果交给调用方缓存；按 scope 过滤后返回。 */
-  function fetchAll(session, typ, onProgress) {
+  function fetchAll(session, typ, onProgress, person) {
     var rows = [], page = 1, total = null, pages = null;
     function step() {
-      return fetchPage(session, typ, page).then(function (p) {
+      return fetchPage(session, typ, page, person).then(function (p) {
         rows = rows.concat(p.rows);
         total = p.total; pages = p.pages;
         if (onProgress) onProgress(rows.length, total);
@@ -347,9 +435,12 @@
   }
 
   /** 把下载到的点位明细填成「全部正常」，与 build_check_detail 一致。 */
-  function buildCheckDetail(data, session, finishTime) {
+  /** asUser={userId,trueName}：代做其他责任人时，点位里的 checkUser/checkUserName
+   *  写被代做人；为空则写当前登录账号。与 Windows 版 build_check_detail() 一致。 */
+  function buildCheckDetail(data, session, finishTime, asUser) {
     var cdl = (data && data.checkDeatilList) || [];
-    var uid = session.userId, uname = session.trueName;
+    var au = asUser || {};
+    var uid = au.userId || session.userId, uname = au.trueName || session.trueName;
     cdl.forEach(function (obj, oi) {
       obj.objectState = '0'; obj.objectInfo = '';
       obj.totalStandard = true; obj.totalCompleted = true;
@@ -453,12 +544,12 @@
   }
 
   /** 完成一条任务。photos: [{name, data(Uint8Array), mime}]，已完成水印处理。 */
-  function submitOne(session, typ, tid, finishTime, photos, perDetail) {
+  function submitOne(session, typ, tid, finishTime, photos, perDetail, asUser) {
     return nativeCall('guard', {}).then(function (g) {
       if (!g.ok) throw new Error('校验未通过：' + (g.reason || '未知原因'));
       return post(g.dl, { taskIds: [tid], type: typ }, session.token, 30).then(function (dl) {
         var data = (dl && dl.data) || {};
-        var cdl = buildCheckDetail(data, session, finishTime);
+        var cdl = buildCheckDetail(data, session, finishTime, asUser);
         if (!cdl.length) throw new Error('下载点位为空');
         var pp = buildPhotoPayload(cdl, photos, perDetail);
         var fields = {
@@ -484,13 +575,16 @@
 
   var YY = {
     HOST: HOST, BASE: BASE, PAGE_SIZE: PAGE_SIZE,
+    PEOPLE_URL: PEOPLE_URL, ORG_URL: ORG_URL,
     utf8Bytes: utf8Bytes, bytesToUtf8: bytesToUtf8,
     bytesToB64: bytesToB64, b64ToBytes: b64ToBytes, b64: b64,
     concatBytes: concatBytes, qs: qs,
     setBridge: setBridge, nativeCall: nativeCall, nativeDone: nativeDone,
-    headers: headers, request: request, get: get, post: post, deadCheck: deadCheck,
+    headers: headers, request: request, get: get, getRoot: getRoot,
+    post: post, deadCheck: deadCheck,
     nowStamp: nowStamp, nowStr: nowStr, todayStr: todayStr, pad2: pad2,
-    login: login, planDay: planDay, categoryOf: categoryOf, normalize: normalize,
+    login: login, listPeople: listPeople,
+    planDay: planDay, categoryOf: categoryOf, normalize: normalize,
     fetchPage: fetchPage, fetchAll: fetchAll, filterRows: filterRows, sortRows: sortRows,
     taskKey: taskKey, paginate: paginate, templateImgs: templateImgs,
     addSeconds: addSeconds, wmDate: wmDate, buildCheckDetail: buildCheckDetail,

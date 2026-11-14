@@ -235,13 +235,18 @@ label.chk input{width:16px;height:16px;flex:0 0 16px;accent-color:var(--accent)}
       <div class="row" style="margin-top:8px">
         <span class="muted" style="width:76px">每页条数</span>
         <select id="pageSize" style="flex:1" onchange="setAllPageSize(this.value)">
-          <option value="20">20 条</option>
-          <option value="50" selected>50 条</option>
-          <option value="100">100 条</option>
-          <option value="200">200 条</option>
+          <option value="5">5 条</option>
+          <option value="10" selected>10 条</option>
         </select>
       </div>
-      <div class="hint">完成时间按 App 口径写入点位明细；水印日期取该时间所在日期。</div>
+      <div class="row" style="margin-top:8px">
+        <span class="muted" style="width:76px">提交身份</span>
+        <select id="submitAs" style="flex:1">
+          <option value="owner">按责任人本人（代做）</option>
+          <option value="self">按当前登录账号</option>
+        </select>
+      </div>
+      <div class="hint">默认每页 10 条（可选 5 条）。代做其他部门任务时，点位责任人与水印写被代做人；平台拒绝就切「当前登录账号」。</div>
     </div>
     <div class="card">
       <h2>运行时状态</h2>
@@ -258,10 +263,12 @@ label.chk input{width:16px;height:16px;flex:0 0 16px;accent-color:var(--accent)}
   <div class="tt">愉悦助手</div>
   <div class="sub">巡检 · 维保 · 任务处理</div>
   <div class="box">
+    <div class="row"><select class="fld" id="acctSel" onchange="pickAcct()"><option value="">（已保存账号 · 选中即自动填入）</option></select></div>
     <div class="row"><input class="fld" type="text" id="user" placeholder="账号" autocomplete="username" autocapitalize="off"></div>
     <div class="row"><input class="fld" type="password" id="pwd" placeholder="密码" autocomplete="current-password"></div>
-    <div class="row">
+    <div class="row" style="display:flex;align-items:center;gap:8px">
       <label class="chk"><input type="checkbox" id="remember" checked> 记住账号密码</label>
+      <button class="ghost sm" style="margin-left:auto" onclick="saveAcct()">存为常用账号</button>
     </div>
     <button class="primary btn" onclick="doLogin()">登录</button>
     <div class="hint" id="loginHint">账号密码只保存在本机 App 内，不上传。</div>
@@ -294,6 +301,16 @@ label.chk input{width:16px;height:16px;flex:0 0 16px;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- ========== 选择责任人浮层 ========== -->
+<div class="modal" id="peopleMask">
+  <div class="sheet">
+    <h2>选择责任人</h2>
+    <div class="muted" id="peopleInfo" style="font-size:12.5px;line-height:1.6">查询中…</div>
+    <div id="peopleList" style="max-height:52vh;overflow:auto;margin-top:8px"></div>
+    <div class="acts"><button class="ghost" onclick="closePeople()">关闭</button></div>
+  </div>
+</div>
+
 <div class="boot" id="boot"><div class="dot"></div><div class="muted">正在校验运行时密钥…</div></div>
 <div class="stopped" id="stopped">
   <div class="box"><h2>已停止使用</h2>
@@ -308,8 +325,9 @@ var $ = function(id){ return document.getElementById(id); };
 var S = { session:null, tab:'today', cache:{}, selected:{}, gal:[],
           pick:new Set(), useMode:'all', busy:false, running:false, stop:false,
           cfg:{}, templates:{}, tplPick:new Set(), tplCtx:null,
-          page:{today:1,overdue:1}, pageSize:{today:50,overdue:50},
-          sortMode:{today:'recent',overdue:'recent'}, _confirmOK:null };
+          page:{today:1,overdue:1}, pageSize:{today:10,overdue:10},
+          sortMode:{today:'recent',overdue:'recent'}, _confirmOK:null,
+          person:'', personId:'', peopleList:[], peopleScope:'today' };
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -331,6 +349,7 @@ function loadCfg(){
   return nc('configGet').then(function(r){
     try{ S.cfg = r.value ? JSON.parse(r.value) : {}; }catch(e){ S.cfg={}; }
     S.templates = (S.cfg.templates && typeof S.cfg.templates==='object') ? S.cfg.templates : {};
+    S.accounts = Array.isArray(S.cfg.accounts) ? S.cfg.accounts : [];
     if(S.cfg.username) $('user').value=S.cfg.username;
     if(S.cfg.password) $('pwd').value=S.cfg.password;
     $('remember').checked = S.cfg.remember !== false;
@@ -338,9 +357,16 @@ function loadCfg(){
     $('tmode').value = S.cfg.task_mode||'multiple';
     $('perDetail').value = String(S.cfg.per_detail||1);
     $('timeMode').value = S.cfg.time_mode||'now';
-    var ps=Number(S.cfg.page_size)||50;
+    $('submitAs').value = S.cfg.submit_as||'owner';
+    // 本版每页只给 5 / 10 两档；旧配置里的 20/50/100/200 一律收敛到 10
+    var ps=Number(S.cfg.page_size)||10;
+    if(ps!==5 && ps!==10) ps=10;
     $('pageSize').value=String(ps);
     S.pageSize.today=ps; S.pageSize.overdue=ps;
+    S.person=String(S.cfg.person||'');
+    S.personId=String(S.cfg.person_id||'');
+    syncPersonInputs();
+    paintAccts();
     if(S.cfg.sort_today) S.sortMode.today=S.cfg.sort_today;
     if(S.cfg.sort_overdue) S.sortMode.overdue=S.cfg.sort_overdue;
     paintMode();
@@ -354,7 +380,10 @@ function saveCfg(){
   S.cfg.task_mode=$('tmode').value;
   S.cfg.per_detail=Number($('perDetail').value)||1;
   S.cfg.time_mode=$('timeMode').value;
-  S.cfg.page_size=Number($('pageSize').value)||50;
+  S.cfg.page_size=Number($('pageSize').value)||10;
+  S.cfg.submit_as=$('submitAs').value;
+  S.cfg.person=S.person; S.cfg.person_id=S.personId;
+  S.cfg.accounts=S.accounts||[];
   S.cfg.sort_today=S.sortMode.today; S.cfg.sort_overdue=S.sortMode.overdue;
   S.cfg.templates=S.templates;
   return nc('configSet',{value:JSON.stringify(S.cfg)});
@@ -364,6 +393,101 @@ function paintMode(){
   $('multiOpts').style.display=single?'none':'block';
   $('singleNote').style.display=single?'block':'none';
 }
+
+// ---- 常用账号：多角色切换用，账号密码只存本机 ----
+function paintAccts(){
+  var s=$('acctSel'), h='<option value="">（已保存账号 · 选中即自动填入）</option>';
+  (S.accounts||[]).forEach(function(a,i){
+    h+='<option value="'+i+'">'+esc(a.label||a.username)+'</option>';
+  });
+  s.innerHTML=h;
+  if(S.cfg && S.cfg.username){
+    (S.accounts||[]).forEach(function(a,i){ if(a.username===S.cfg.username) s.value=String(i); });
+  }
+}
+function pickAcct(){
+  var i=$('acctSel').value; if(i==='') return;
+  var a=(S.accounts||[])[+i]; if(!a) return;
+  $('user').value=a.username||''; $('pwd').value=a.password||'';
+  toast('已填入 '+(a.label||a.username)+'，点「登录」切换');
+}
+function saveAcct(){
+  var u=$('user').value.trim(), p=$('pwd').value;
+  if(!u||!p){ toast('先填账号密码再保存'); return; }
+  S.accounts=S.accounts||[];
+  var hit=null;
+  S.accounts.forEach(function(a){ if(a.username===u) hit=a; });
+  if(hit){ hit.password=p; } else { S.accounts.push({label:u,username:u,password:p}); }
+  paintAccts(); S.cfg.accounts=S.accounts;
+  nc('configSet',{value:JSON.stringify(S.cfg)}).catch(function(){});
+  toast('已保存常用账号：'+u);
+}
+
+// ---- 多角色 / 跨部门：责任人检索 + 代做 ----
+function personLabel(){
+  return S.person==='*' ? '全部责任人' : (S.person ? ('责任人：'+S.person) : '责任人：本人');
+}
+function syncPersonInputs(){
+  ['today','overdue'].forEach(function(s){
+    var el=$('person_'+s); if(el) el.value=S.person;
+  });
+}
+function onPersonInput(scope){
+  S.person=($('person_'+scope).value||'').trim();
+  S.personId='';
+  syncPersonInputs();
+  S.page.today=1; S.page.overdue=1;
+  saveCfg().catch(function(){});
+  renderTasks();
+  toast(personLabel()+' · 点「查询」拉取');
+}
+function setPerson(scope,v,autoFetch){
+  S.person=v; S.personId='';
+  syncPersonInputs();
+  S.page.today=1; S.page.overdue=1;
+  saveCfg().catch(function(){});
+  if(autoFetch) doFetch(scope);
+  else { renderTasks(); toast(personLabel()+' · 点「查询」拉取'); }
+}
+function findPeople(scope){
+  if(!needLogin()) return;
+  S.peopleScope=scope;
+  var kw=($('person_'+scope).value||'').trim();
+  if(kw==='*') kw='';
+  $('peopleInfo').textContent='正在查询项目人员…';
+  $('peopleList').innerHTML='';
+  $('peopleMask').style.display='flex';
+  YY.listPeople(S.session,kw).then(function(r){
+    S.peopleList=r.people||[];
+    var org=(r.depts&&r.depts.length)?(' · 组织：'+r.depts.slice(0,4).join(' / ')):'';
+    if(!S.peopleList.length){
+      $('peopleInfo').textContent=(r.error||'没查到人员')+'，可直接手填同事姓名。'+org;
+      return;
+    }
+    $('peopleInfo').textContent='共 '+S.peopleList.length+' 人，点一行即设为责任人'+org;
+    var html='';
+    S.peopleList.forEach(function(x,i){
+      html+='<div class="tpl-item" style="cursor:pointer" onclick="pickPerson('+i+')">'+
+        '<div class="info"><div class="k">'+esc(x.name)+'</div>'+
+        '<div class="muted">'+esc(x.dept||'-')+' · '+esc(x.id||'-')+'</div></div></div>';
+    });
+    $('peopleList').innerHTML=html;
+  }).catch(function(e){
+    $('peopleInfo').textContent='查询失败：'+(e.message||e)+'，可直接手填姓名。';
+    if(e.sessionExpired){ S.session=null; showLogin(); }
+  });
+}
+function pickPerson(i){
+  var x=S.peopleList[i]; if(!x) return;
+  S.person=x.name; S.personId=x.id||'';
+  syncPersonInputs();
+  S.page.today=1; S.page.overdue=1;
+  saveCfg().catch(function(){});
+  closePeople();
+  toast('已设为 '+x.name+'，正在拉取其任务…');
+  doFetch(S.peopleScope);
+}
+function closePeople(){ $('peopleMask').style.display='none'; }
 
 // ---- 登录页 / 主界面 ----
 function showLogin(){
@@ -396,9 +520,10 @@ function doLogout(){
   S.session=null; S.cache={}; S.selected={};
   S.page.today=1; S.page.overdue=1;
   $('loginBadge').textContent='未登录'; $('loginBadge').className='badge';
-  S.cfg.password=''; S.cfg.templates=S.templates;
+  if(!$('remember').checked) S.cfg.password='';   // 勾了「记住」就退出也保留
+  S.cfg.templates=S.templates;
   nc('configSet',{value:JSON.stringify(S.cfg)}).catch(function(){});
-  $('pwd').value='';
+  if(!$('remember').checked) $('pwd').value='';
   showLogin(); renderTasks(); toast('已退出');
 }
 function needLogin(){
@@ -429,6 +554,13 @@ function taskBoxHtml(scope){
       '<button class="sm" onclick="doRefresh(\''+scope+'\')">重扫</button>'+
     '</div>'+
     '<div class="row" style="margin-bottom:8px">'+
+      '<input type="text" id="person_'+scope+'" placeholder="责任人：留空=本人" style="flex:1" '+
+        'onchange="onPersonInput(\''+scope+'\')">'+
+      '<button class="sm" onclick="findPeople(\''+scope+'\')">查人员</button>'+
+      '<button class="ghost sm" onclick="setPerson(\''+scope+'\',\'*\',true)">全部</button>'+
+      '<button class="ghost sm" onclick="setPerson(\''+scope+'\',\'\',true)">本人</button>'+
+    '</div>'+
+    '<div class="row" style="margin-bottom:8px">'+
       '<input type="text" id="kw_'+scope+'" placeholder="搜索任务名 / 编号 / 日期" oninput="onSearch(\''+scope+'\')">'+
       '<button class="sm" id="sortBtn_'+scope+'" onclick="toggleSort(\''+scope+'\')">▼ 近期超时优先</button>'+
     '</div>'+
@@ -452,7 +584,9 @@ function taskBoxHtml(scope){
 $('taskBoxToday').innerHTML=taskBoxHtml('today');
 $('taskBoxOverdue').innerHTML=taskBoxHtml('overdue');
 
-function cacheKey(scope){ var t=$('typ_'+scope); return (t?t.value:'inspect')+'|'+YY.todayStr(); }
+// 缓存键带责任人维度：本人 / 各姓名 / 全部责任人互不覆盖（对齐 Windows 版 cache_key）
+function cacheKey(scope){ var t=$('typ_'+scope);
+  return (t?t.value:'inspect')+'|'+S.person+'|'+YY.todayStr(); }
 
 function doFetch(scope){
   if(!needLogin()) return;
@@ -467,8 +601,8 @@ function doRefresh(scope){
   var bar=$('bar_'+scope), typ=$('typ_'+scope).value;
   bar.textContent='正在扫描全表…（任务多时首次较慢，结果会缓存）';
   YY.fetchAll(S.session,typ,function(cnt,total){
-    bar.textContent='正在扫描全表…已取 '+cnt+' 条'+(total?(' / 共约 '+total):'');
-  }).then(function(c){
+    bar.textContent='正在扫描全表（'+personLabel()+'）…已取 '+cnt+' 条'+(total?(' / 共约 '+total):'');
+  },S.person).then(function(c){
     S.cache[cacheKey(scope)]=c; S.busy=false;
     S.page[scope]=1; renderTasks(); toast('扫描完成 · '+c.rows.length+' 条，已缓存');
   }).catch(function(e){ S.busy=false;
@@ -509,7 +643,8 @@ function jumpPage(scope,v){
   S.page[scope]=p; renderTasks();
 }
 function setAllPageSize(v){
-  var n=Number(v)||50;
+  var n=Number(v)||10;
+  if(n!==5 && n!==10) n=10;
   S.pageSize.today=n; S.pageSize.overdue=n;
   S.page.today=1; S.page.overdue=1;
   saveCfg().catch(function(){});
@@ -560,13 +695,15 @@ function renderTasks(){
         '<div class="info"><div class="nm">'+catTag(r.category)+esc(r.name||'(无名称)')+
         (n?'<span class="tplbadge">固定图 '+n+' 张</span>':'')+'</div>'+
         '<div class="meta">'+esc(r.planStart)+' · '+esc(r.taskId)+
+        (r.liable?(' · 责任人 '+esc(r.liable)):'')+
         (r.delay!==''&&r.delay!=null?(' · 逾期 '+esc(r.delay)+' 天'):'')+'</div>'+
         '<button class="ghost sm" style="margin-top:6px;min-height:28px" onclick="openTpl(\''+scope+'\',\''+esc(r.taskId)+'\')">配图 / 改模板</button>'+
         '</div></div>';
     });
     box.innerHTML = pg.rows.length?html:'<div class="empty">该范围内没有任务</div>';
     var c=S.cache[cacheKey(scope)], selN=Object.keys(S.selected).filter(function(k){return k.indexOf(scope+'|')===0;}).length;
-    bar.innerHTML='<b>'+(scope==='today'?'今日任务':'逾期任务')+'</b>：筛选后 '+pg.total+
+    bar.innerHTML='<b>'+(scope==='today'?'今日任务':'逾期任务')+'</b> · '+esc(personLabel())+
+      '：筛选后 '+pg.total+
       ' 条 · 第 '+pg.page+'/'+pg.pages+' 页（显示 '+(pg.total?pg.start+1:0)+'–'+pg.end+'）'+
       ' · 已选 <b>'+selN+'</b> 条 · 扫描 '+c.rows.length+' 条'+
       '<br><span class="muted">'+(S.sortMode[scope]==='recent'?'近期超时在前':'早期超时在前')+
@@ -729,7 +866,7 @@ function renderPick(){
 function togglePick(id){ if(S.pick.has(id)) S.pick.delete(id); else S.pick.add(id); renderPick(); }
 
 // ---- 照片准备（模板优先 + 水印 + 压缩）----
-function preparePhotos(when,task){
+function preparePhotos(when,task,wmName){
   var ids=YY.templateImgs(S.templates,task?task.name:'');
   var usedTpl=ids.length>0;
   if(!usedTpl){
@@ -739,7 +876,7 @@ function preparePhotos(when,task){
   var valid={}; S.gal.forEach(function(it){ valid[it.id]=1; });
   ids=ids.filter(function(i){ return valid[i]; });
   if(!ids.length) return Promise.resolve([]);
-  var name=S.session?S.session.trueName:'';
+  var name=wmName||(S.session?S.session.trueName:'');
   return Promise.all(ids.map(function(id){
     return nc('galleryRead',{id:id}).then(function(r){
       if(!r.ok) return null;
@@ -782,14 +919,24 @@ function doRun(scope){
   var pace=single?0:(Number($('pace').value)||0);
   var per=Number($('perDetail').value)||1;
   var tplN=items.filter(function(r){ return YY.templateImgs(S.templates,r.name).length>0; }).length;
+  var asTxt=(S.person && S.person!=='*')
+    ? ('代做责任人：'+S.person+' · 提交身份：'+($('submitAs').value==='owner'?'责任人本人':'当前登录账号'))
+    : (S.person==='*'?'责任人：全部（不按姓名过滤）':'责任人：本人');
   askConfirm('确认完成 '+items.length+' 条'+(scope==='today'?'今日':'逾期')+'任务？'+
     (single?'（单次任务 · 即时执行）':'（间隔 '+pace+' 秒/条）')+
+    '\n'+asTxt+
     (tplN?('\n其中 '+tplN+' 条使用任务模板固定图'):''),function(){
     startRun(scope,items,single,pace,per);
   });
 }
 function startRun(scope,items,single,pace,per){
   S.running=true; S.stop=false;
+  // 代做：点位 checkUser/checkUserName 与照片水印写被代做人；选「当前登录账号」则不覆盖
+  var asUser=null, wmName=S.session?S.session.trueName:'';
+  if(S.person && S.person!=='*' && $('submitAs').value==='owner'){
+    asUser={userId:S.personId||S.session.userId,trueName:S.person};
+    wmName=S.person;
+  }
   ['today','overdue'].forEach(function(s){ $('stopBtn_'+s).disabled=false; });
   var prog=$('prog_'+scope), cd=$('cd_'+scope), pbar=$('pbar_'+scope);
   var done=0, fail=0, i=0;
@@ -817,8 +964,8 @@ function startRun(scope,items,single,pace,per){
       if(S.stop){ finish(); return; }
       tick('正在完成第 '+idx+'/'+items.length+' 条 · '+r.taskId);
       var when=planFinish(r);
-      preparePhotos(when,r).then(function(photos){
-        return YY.submitOne(S.session,$('typ_'+scope).value,r.taskId,when,photos,per);
+      preparePhotos(when,r,wmName).then(function(photos){
+        return YY.submitOne(S.session,$('typ_'+scope).value,r.taskId,when,photos,per,asUser);
       }).then(function(res){
         if(res.ok){ done++; submittedSet[scope+'|'+r.taskId]=true; }
         else { fail++; toast('第 '+idx+' 条失败：'+esc(JSON.stringify(res.resp).slice(0,90))); }

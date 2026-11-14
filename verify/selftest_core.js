@@ -64,10 +64,15 @@ eq('昨天=逾期', YY.categoryOf('2026-11-12 08:00:00', '2026-11-13'), 'overdue
 eq('去年=逾期', YY.categoryOf('2025-01-01 08:00:00', '2026-11-13'), 'overdue');
 eq('明天=未来', YY.categoryOf('2026-11-14 08:00:00', '2026-11-13'), 'future');
 eq('空=unknown', YY.categoryOf('', '2026-11-13'), 'unknown');
+// 相对今天生成，避免把日期写死后跨天全变「逾期」（2026-11-14 曾因此误报 2 条）
+function dayOff(n) {
+  const d = new Date(); d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + YY.pad2(d.getMonth() + 1) + '-' + YY.pad2(d.getDate());
+}
 const mixed = [
-  { taskId: 'T1', taskPTimeStart: '2026-11-13 08:00:00', eiTaskName: '今日A' },
-  { taskId: 'T2', taskPTimeStart: '2026-11-10 08:00:00', eiTaskName: '逾期B' },
-  { taskId: 'T3', taskPTimeStart: '2026-11-13 09:00:00', eiTaskName: '今日C' }
+  { taskId: 'T1', taskPTimeStart: dayOff(0) + ' 08:00:00', eiTaskName: '今日A' },
+  { taskId: 'T2', taskPTimeStart: dayOff(-3) + ' 08:00:00', eiTaskName: '逾期B' },
+  { taskId: 'T3', taskPTimeStart: dayOff(0) + ' 09:00:00', eiTaskName: '今日C' }
 ];
 const nr = mixed.map(r => YY.normalize(r, 'inspect'));
 const todayRows = YY.filterRows(nr, 'today', '');
