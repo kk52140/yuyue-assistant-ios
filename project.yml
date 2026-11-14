@@ -22,9 +22,14 @@ targets:
       - path: YuyueAssistant/Resources/gallery
         type: folder
         buildPhase: resources
+      - path: YuyueAssistant/Resources/Assets.xcassets
+      - path: YuyueAssistant/Resources/Icon.png
+      - path: YuyueAssistant/Resources/Icon-120.png
+      - path: YuyueAssistant/Resources/Icon-152.png
+      - path: YuyueAssistant/Resources/Icon-167.png
     # 注意：这里不能写 info: {path: ...}。XcodeGen 会用自动生成的空壳 plist
-    # 覆盖掉仓库里手写的 Info.plist，导致 CFBundleDisplayName / UILaunchScreen
-    # 等自定义键全部丢失。改用下面的 INFOPLIST_FILE 让它直接消费现成文件。
+    # 覆盖掉仓库里手写的 Info.plist，导致 CFBundleDisplayName / CFBundleIconFile /
+    # UILaunchScreen 等自定义键全部丢失。改用下面的 INFOPLIST_FILE 直接消费现成文件。
     entitlements:
       path: Entitlements.plist
     settings:
@@ -38,6 +43,7 @@ targets:
         DEVELOPMENT_TEAM: ""
         IPHONEOS_DEPLOYMENT_TARGET: "15.0"
         GENERATE_INFOPLIST_FILE: "NO"
+        ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"
         INFOPLIST_FILE: YuyueAssistant/Info.plist
 
 schemes:

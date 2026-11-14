@@ -10,6 +10,8 @@
 	<string>YuyueAssistant</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.kk521.yuyue.assistant</string>
+	<key>CFBundleIconFile</key>
+	<string>Icon.png</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

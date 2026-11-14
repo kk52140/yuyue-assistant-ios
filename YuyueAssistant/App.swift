@@ -23,7 +23,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-final class WebViewController: UIViewController, WKScriptMessageHandler {
+final class WebViewController: UIViewController, WKScriptMessageHandler, WKUIDelegate {
 
     private var webView: WKWebView!
     private var api: NativeAPI!
@@ -45,6 +45,8 @@ final class WebViewController: UIViewController, WKScriptMessageHandler {
         wv.scrollView.backgroundColor = UIColor(red: 0.055, green: 0.071, blue: 0.098, alpha: 1.0)
         wv.scrollView.contentInsetAdjustmentBehavior = .never
         wv.isOpaque = false
+        // 原生 confirm/alert 兜底：WKWebView 不设 uiDelegate 时 JS 弹窗会被静默取消
+        wv.uiDelegate = self
         view.addSubview(wv)
 
         NSLayoutConstraint.activate([
@@ -85,5 +87,26 @@ final class WebViewController: UIViewController, WKScriptMessageHandler {
                                didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any] else { return }
         api.handle(body)
+    }
+
+    // MARK: - WKUIDelegate
+
+    func webView(_ webView: WKWebView,
+                 runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping (Bool) -> Void) {
+        let ac = UIAlertController(title: "确认", message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "取消", style: .cancel) { _ in completionHandler(false) })
+        ac.addAction(UIAlertAction(title: "确定", style: .default) { _ in completionHandler(true) })
+        present(ac, animated: true)
+    }
+
+    func webView(_ webView: WKWebView,
+                 runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping () -> Void) {
+        let ac = UIAlertController(title: "提示", message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "好", style: .default) { _ in completionHandler() })
+        present(ac, animated: true)
     }
 }

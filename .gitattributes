@@ -1,10 +1,13 @@
-# 统一换行，避免 macOS runner 上 build_ipa.sh 因 CRLF 执行失败
-* text=auto
-*.sh text eol=lf
+# 保证 shell 脚本在 macOS runner 上是 LF，否则会报 bad interpreter: /bin/bash^M
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.js    text eol=lf
 *.swift text eol=lf
-*.yml text eol=lf
-*.js text eol=lf
-*.py text eol=lf
-*.jpg binary
-*.png binary
-*.ipa binary
+*.html  text eol=lf
+*.plist text eol=lf
+*.py    text eol=lf
+*.jpg   binary
+*.png   binary
+
+# 打包产物
+*.ipa    binary

@@ -298,6 +298,37 @@
     return good.concat(bad);
   }
 
+  /** 任务模板 key：任务名去掉尾部日期/时间，配一次天天套
+   *  与配图工具 app.py 的 task_key() 完全一致：
+   *  "…排烟风机巡检A4_每日_2026-11-06 08:00:00" → "…排烟风机巡检A4_每日"
+   */
+  function taskKey(name) {
+    var s = String(name || '').replace(/_\d{4}[-/.]\d{1,2}[-/.]\d{1,2}.*$/, '');
+    return s.replace(/\s+/g, '').trim();
+  }
+
+  /** 前端分页：只把当前页交给渲染层，避免 1000+ 条一次铺进 DOM */
+  function paginate(rows, page, size) {
+    rows = rows || [];
+    size = Math.max(1, Math.min(500, Number(size) || 50));
+    var total = rows.length;
+    var pages = Math.max(1, Math.ceil(total / size));
+    var p = Math.max(1, Math.min(pages, Number(page) || 1));
+    var start = (p - 1) * size;
+    return {
+      rows: rows.slice(start, start + size), page: p, pages: pages,
+      total: total, size: size, start: start,
+      end: Math.min(total, start + size)
+    };
+  }
+
+  /** 任务模板命中：返回该任务名绑定的图库 id 列表（可能为空） */
+  function templateImgs(templates, name) {
+    var k = taskKey(name);
+    var rec = templates && templates[k];
+    return (rec && Array.isArray(rec.imgs)) ? rec.imgs.slice() : [];
+  }
+
   // ---------------------------------------------------------------- 提交
 
   function addSeconds(ts, seconds) {
@@ -461,6 +492,7 @@
     nowStamp: nowStamp, nowStr: nowStr, todayStr: todayStr, pad2: pad2,
     login: login, planDay: planDay, categoryOf: categoryOf, normalize: normalize,
     fetchPage: fetchPage, fetchAll: fetchAll, filterRows: filterRows, sortRows: sortRows,
+    taskKey: taskKey, paginate: paginate, templateImgs: templateImgs,
     addSeconds: addSeconds, wmDate: wmDate, buildCheckDetail: buildCheckDetail,
     collectDetailIds: collectDetailIds, prepPhoto: prepPhoto, multipart: multipart,
     buildPhotoPayload: buildPhotoPayload, submitOne: submitOne

@@ -18,7 +18,7 @@ body{padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset
 h1{font-size:19px;margin:0;font-weight:650;letter-spacing:.5px}
 h2{font-size:14px;margin:0 0 10px;font-weight:600;display:flex;align-items:center;gap:8px}
 h2:before{content:"";width:3px;height:14px;border-radius:2px;background:var(--accent)}
-.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
 .badge{font-size:11.5px;padding:4px 9px;border-radius:20px;background:var(--chip);color:var(--muted)}
 .badge.on{background:rgba(62,207,142,.14);color:var(--ok)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px}
@@ -34,15 +34,16 @@ button{background:var(--surface2);border:1px solid var(--line);color:var(--text)
 button:active{opacity:.65}
 button:disabled{opacity:.45}
 button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+button.warn{background:rgba(229,169,75,.16);border-color:rgba(229,169,75,.45);color:var(--warn)}
 button.ok{background:rgba(62,207,142,.16);border-color:rgba(62,207,142,.4);color:var(--ok)}
 button.danger{background:rgba(239,107,107,.14);border-color:rgba(239,107,107,.4);color:var(--danger)}
 button.ghost{background:transparent}
 button.sm{padding:6px 10px;min-height:30px;font-size:12.5px}
 .muted{color:var(--muted);font-size:12px}
 .hint{color:var(--muted);font-size:11.5px;line-height:1.55;margin-top:8px}
-.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);
   border-radius:10px;padding:4px;margin-bottom:12px}
-.tab{flex:1;text-align:center;padding:9px 4px;border-radius:7px;font-size:13px;color:var(--muted)}
+.tab{flex:1;text-align:center;padding:9px 2px;border-radius:7px;font-size:12px;color:var(--muted)}
 .tab.active{background:var(--accent2);color:#fff;font-weight:600}
 .pane{display:none}.pane.show{display:block}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
@@ -59,8 +60,14 @@ button.sm{padding:6px 10px;min-height:30px;font-size:12.5px}
 .tag.overdue{background:rgba(229,169,75,.16);color:var(--warn)}
 .tag.future{background:rgba(139,152,170,.16);color:var(--muted)}
 .tag.done{background:rgba(62,207,142,.16);color:var(--ok)}
+.tplbadge{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:4px;
+  background:rgba(62,207,142,.14);color:var(--ok);margin-left:5px}
 .bar{background:var(--surface2);border:1px solid var(--line);border-radius:10px;
   padding:10px 12px;margin-bottom:10px;font-size:12.5px;line-height:1.6}
+.pager{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--line);font-size:12px}
+.pager input,.pager select{flex:0 0 auto;width:auto;min-height:32px;padding:5px 8px;font-size:12px}
+.pager .pn{color:var(--muted)}
 .progress{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0}
 .progress>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
 .cd{font-size:13px;color:var(--warn);font-weight:600}
@@ -71,160 +78,244 @@ button.sm{padding:6px 10px;min-height:30px;font-size:12.5px}
   overflow:hidden;text-overflow:ellipsis}
 .gi .del{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;
   background:rgba(0,0,0,.65);color:#fff;border:0;font-size:14px;line-height:1;padding:0;min-height:0}
+.gi.pick{outline:2px solid var(--accent)}
 .empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:12.5px;line-height:1.7}
 .foot{display:flex;gap:8px;margin-top:10px}
 .foot button{flex:1}
 label.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
 label.chk input{width:16px;height:16px;flex:0 0 16px;accent-color:var(--accent)}
+.tpl-item{display:flex;gap:8px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.tpl-item:last-child{border-bottom:0}
+.tpl-item .info{flex:1;min-width:0}
+.tpl-item .k{font-size:12.5px;word-break:break-all}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);
   transform:translateX(-50%);background:#000c;color:#fff;padding:10px 16px;
   border-radius:20px;font-size:12.5px;max-width:86%;text-align:center;
-  opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+  opacity:0;pointer-events:none;transition:opacity .25s;z-index:220}
 .toast.on{opacity:1}
-.stopped{position:fixed;inset:0;background:#0b0f15f2;z-index:200;display:none;
+.stopped{position:fixed;inset:0;background:#0b0f15f2;z-index:210;display:none;
   align-items:center;justify-content:center;padding:24px}
 .stopped .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:24px;text-align:center;max-width:320px}
 .stopped h2{justify-content:center}
-.boot{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;
+.boot{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;
   align-items:center;justify-content:center;flex-direction:column;gap:12px}
 .boot .dot{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* 启动登录页：校验浮层盖在上面，校验通过自动露出 */
+.login{position:fixed;inset:0;background:var(--bg);z-index:150;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px);gap:16px}
+.login .logo{width:86px;height:86px;border-radius:20px;background:#fff;overflow:hidden;
+  border:1px solid var(--line);box-shadow:0 6px 24px #0006}
+.login .logo img{width:100%;height:100%;object-fit:cover;display:block}
+.login .tt{font-size:21px;font-weight:650;letter-spacing:1px}
+.login .sub{color:var(--muted);font-size:12px;margin-top:-8px}
+.login .box{width:100%;max-width:350px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:18px}
+.login .box .row{margin-bottom:10px}
+.login .box .fld{width:100%}
+.login .btn{width:100%;margin-top:4px}
+/* 自定义确认 / 选图浮层（不依赖 WKUIDelegate 的 confirm） */
+.modal{position:fixed;inset:0;background:#000a;z-index:180;display:none;
+  align-items:flex-end;justify-content:center}
+.modal .sheet{width:100%;max-width:540px;max-height:84vh;overflow:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 0 0;
+  padding:16px 16px calc(env(safe-area-inset-bottom) + 16px)}
+.modal .sheet h2{margin-bottom:10px}
+.modal .msg{font-size:13.5px;line-height:1.7;margin-bottom:14px;white-space:pre-line}
+.modal .acts{display:flex;gap:8px;margin-top:14px}
+.modal .acts button{flex:1}
 </style>
 </head>
 <body>
 
-<div class="top">
-  <h1>愉悦助手</h1>
-  <span class="badge" id="loginBadge">未登录</span>
+<!-- ========== 主界面（登录后才能看到） ========== -->
+<div id="mainUI" style="display:none">
+  <div class="top">
+    <h1>愉悦助手</h1>
+    <span class="badge" id="loginBadge">未登录</span>
+    <button class="ghost sm" onclick="doLogout()">退出</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-p="today" onclick="switchTab('today')">今日任务</div>
+    <div class="tab" data-p="overdue" onclick="switchTab('overdue')">逾期任务</div>
+    <div class="tab" data-p="gallery" onclick="switchTab('gallery')">图库</div>
+    <div class="tab" data-p="template" onclick="switchTab('template')">模板</div>
+    <div class="tab" data-p="setting" onclick="switchTab('setting')">设置</div>
+  </div>
+
+  <div class="pane show" id="pane-today"><div id="taskBoxToday"></div></div>
+  <div class="pane" id="pane-overdue"><div id="taskBoxOverdue"></div></div>
+
+  <!-- 图库 -->
+  <div class="pane" id="pane-gallery">
+    <div class="card">
+      <h2>软件图库 <span class="muted" id="galCount">0 张</span></h2>
+      <div class="row" style="margin-bottom:10px">
+        <button class="primary sm" onclick="document.getElementById('fileInput').click()">＋ 添加照片</button>
+        <button class="sm" onclick="loadGallery()">刷新</button>
+        <button class="ghost sm" onclick="restoreGallery()">恢复内置图</button>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="addGalleryFiles(this)">
+      <div class="gal" id="galGrid"></div>
+      <div class="empty" id="galEmpty">图库为空</div>
+      <div class="hint">打包配图：直接往 IPA 工程 <b>Resources/gallery/</b> 增删 jpg/png 再重新打包。<br>
+        日常换图：用「添加照片」从相册导入，点缩略图右上角 × 删除；内置图可「恢复内置图」找回。<br>
+        单个任务固定用图请到任务行点「配图」，或到「模板」页管理。</div>
+    </div>
+    <div class="card">
+      <h2>未绑模板时的默认用图</h2>
+      <div class="seg" style="margin-bottom:8px">
+        <button id="useAll" class="sel" onclick="setUseMode('all')">图库全部</button>
+        <button id="usePick" onclick="setUseMode('pick')">手动挑图</button>
+        <button id="useNone" onclick="setUseMode('none')">不配图</button>
+      </div>
+      <div class="muted" id="useInfo">使用图库全部图片</div>
+      <div class="gal" id="pickGrid" style="margin-top:10px;display:none"></div>
+      <div class="hint"><b>任务模板优先</b>：任务绑了固定图片就用模板图，没绑才用这里的默认设置。<br>
+        提交前统一缩到 412 宽、加姓名/日期水印、压成 JPEG q50。</div>
+    </div>
+  </div>
+
+  <!-- 任务模板 -->
+  <div class="pane" id="pane-template">
+    <div class="card">
+      <h2>任务图片模板 <span class="muted" id="tplCount">0 条</span></h2>
+      <div class="muted" style="line-height:1.7;margin-bottom:10px">
+        按<b>任务名</b>绑定固定照片（自动去掉尾部日期），配一次，以后每天的同类任务自动套用。
+        例：「…排烟风机巡检A4_每日_2026-11-06 08:00:00」→「…排烟风机巡检A4_每日」。
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <button class="sm" onclick="renderTemplates()">刷新</button>
+        <button class="ghost sm" onclick="clearTpls()">清空全部模板</button>
+      </div>
+      <div id="tplList"></div>
+      <div class="hint">在「今日任务 / 逾期任务」列表里，点每条任务下方的「配图」即可绑定或修改。<br>
+        模板与账号一起存在本机，卸载 App 才会丢失。</div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="pane" id="pane-setting">
+    <div class="card">
+      <h2>提交设置</h2>
+      <div class="row" style="margin-bottom:8px">
+        <span class="muted" style="width:76px">任务模式</span>
+        <select id="tmode" onchange="paintMode()" style="flex:1">
+          <option value="multiple">多次任务</option>
+          <option value="single">单次任务（即时）</option>
+        </select>
+      </div>
+      <div id="multiOpts">
+        <div class="row" style="margin-bottom:8px">
+          <span class="muted" style="width:76px">提交节奏</span>
+          <input type="number" id="pace" value="2" min="0" max="120" step="1">
+          <span class="muted">秒/条</span>
+        </div>
+      </div>
+      <div id="singleNote" class="hint" style="display:none">单次任务：立即提交，无时间选项、无列队等待。</div>
+      <div class="row" style="margin-top:8px">
+        <span class="muted" style="width:76px">每项照片</span>
+        <select id="perDetail" style="flex:1">
+          <option value="1">1 张（推荐，最快）</option>
+          <option value="2">2 张</option>
+          <option value="3">3 张</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <span class="muted" style="width:76px">完成时间</span>
+        <select id="timeMode" style="flex:1">
+          <option value="now">当前时刻</option>
+          <option value="plan">按计划日期当天</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <span class="muted" style="width:76px">每页条数</span>
+        <select id="pageSize" style="flex:1" onchange="setAllPageSize(this.value)">
+          <option value="20">20 条</option>
+          <option value="50" selected>50 条</option>
+          <option value="100">100 条</option>
+          <option value="200">200 条</option>
+        </select>
+      </div>
+      <div class="hint">完成时间按 App 口径写入点位明细；水印日期取该时间所在日期。</div>
+    </div>
+    <div class="card">
+      <h2>运行时状态</h2>
+      <div class="muted" id="guardInfo">—</div>
+      <div class="row" style="margin-top:10px"><button class="sm" onclick="checkGuard()">重新校验</button>
+        <button class="ghost sm" onclick="clearCache()">清空任务缓存</button></div>
+    </div>
+  </div>
 </div>
 
-<!-- 启动校验浮层 -->
-<div class="boot" id="boot">
-  <div class="dot"></div><div class="muted">正在校验运行时密钥…</div>
+<!-- ========== 启动登录页 ========== -->
+<div class="login" id="loginScreen">
+  <div class="logo"><img src="../Icon.png" alt="" onerror="this.style.display='none'"></div>
+  <div class="tt">愉悦助手</div>
+  <div class="sub">巡检 · 维保 · 任务处理</div>
+  <div class="box">
+    <div class="row"><input class="fld" type="text" id="user" placeholder="账号" autocomplete="username" autocapitalize="off"></div>
+    <div class="row"><input class="fld" type="password" id="pwd" placeholder="密码" autocomplete="current-password"></div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="remember" checked> 记住账号密码</label>
+    </div>
+    <button class="primary btn" onclick="doLogin()">登录</button>
+    <div class="hint" id="loginHint">账号密码只保存在本机 App 内，不上传。</div>
+  </div>
 </div>
+
+<!-- ========== 自定义确认浮层 ========== -->
+<div class="modal" id="confirmMask">
+  <div class="sheet">
+    <h2>确认操作</h2>
+    <div class="msg" id="confirmMsg"></div>
+    <div class="acts">
+      <button class="ghost" onclick="confirmCancel()">取消</button>
+      <button class="primary" onclick="confirmOK()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 任务配图浮层 ========== -->
+<div class="modal" id="tplMask">
+  <div class="sheet">
+    <h2>绑定固定照片</h2>
+    <div class="muted" id="tplTaskName" style="word-break:break-all;line-height:1.6"></div>
+    <div class="hint" style="margin:6px 0 10px">勾选的照片会固定用于这条任务；同名任务以后自动套用。留空并保存＝取消绑定。</div>
+    <div class="gal" id="tplGrid"></div>
+    <div class="acts">
+      <button class="ghost" onclick="closeTpl()">取消</button>
+      <button class="primary" onclick="saveTpl()">保存模板</button>
+    </div>
+  </div>
+</div>
+
+<div class="boot" id="boot"><div class="dot"></div><div class="muted">正在校验运行时密钥…</div></div>
 <div class="stopped" id="stopped">
   <div class="box"><h2>已停止使用</h2>
     <p class="muted" id="stoppedMsg">校验密钥不匹配或读取失败。</p>
     <button class="primary" onclick="retryGuard()">重试校验</button></div>
 </div>
-
-<!-- 登录 -->
-<div class="card" id="loginCard">
-  <h2>账号登录</h2>
-  <div class="row" style="margin-bottom:8px">
-    <input type="text" id="user" placeholder="账号" autocomplete="username" autocapitalize="off">
-  </div>
-  <div class="row" style="margin-bottom:8px">
-    <input type="password" id="pwd" placeholder="密码" autocomplete="current-password">
-  </div>
-  <div class="row">
-    <label class="chk"><input type="checkbox" id="remember" checked> 记住账号密码</label>
-    <span style="flex:1"></span>
-    <button class="primary" onclick="doLogin()">登录</button>
-    <button class="ghost sm" onclick="doLogout()">退出</button>
-  </div>
-  <div class="hint">账号密码仅保存在本机 App 内（UserDefaults），不上传。</div>
-</div>
-
-<div class="tabs">
-  <div class="tab active" data-p="today" onclick="switchTab('today')">今日任务</div>
-  <div class="tab" data-p="overdue" onclick="switchTab('overdue')">逾期任务</div>
-  <div class="tab" data-p="gallery" onclick="switchTab('gallery')">图库</div>
-  <div class="tab" data-p="setting" onclick="switchTab('setting')">设置</div>
-</div>
-
-<!-- 今日 / 逾期共用查询区 -->
-<div class="pane show" id="pane-today"><div id="taskBoxToday"></div></div>
-<div class="pane" id="pane-overdue"><div id="taskBoxOverdue"></div></div>
-
-<!-- 图库 -->
-<div class="pane" id="pane-gallery">
-  <div class="card">
-    <h2>软件图库 <span class="muted" id="galCount">0 张</span></h2>
-    <div class="row" style="margin-bottom:10px">
-      <button class="primary sm" onclick="document.getElementById('fileInput').click()">＋ 添加照片</button>
-      <button class="sm" onclick="loadGallery()">刷新</button>
-      <button class="ghost sm" onclick="restoreGallery()">恢复内置图</button>
-    </div>
-    <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="addGalleryFiles(this)">
-    <div class="gal" id="galGrid"></div>
-    <div class="empty" id="galEmpty">图库为空</div>
-    <div class="hint">打包配图：直接往 IPA 工程 <b>Resources/gallery/</b> 目录增删 jpg/png 再重新打包即可替换初始图库。<br>
-      日常换图：用上面的「添加照片」从相册导入，点缩略图右上角 × 删除；内置图可「恢复内置图」找回。<br>
-      也可在 iOS「文件」App 里直接操作本 App 的 Documents/gallery 目录。</div>
-  </div>
-  <div class="card">
-    <h2>本次提交用图</h2>
-    <div class="seg" style="margin-bottom:8px">
-      <button id="useAll" class="sel" onclick="setUseMode('all')">图库全部</button>
-      <button id="usePick" onclick="setUseMode('pick')">手动挑图</button>
-      <button id="useNone" onclick="setUseMode('none')">不配图</button>
-    </div>
-    <div class="muted" id="useInfo">使用图库全部图片</div>
-    <div class="gal" id="pickGrid" style="margin-top:10px;display:none"></div>
-    <div class="hint">提交前会按 App 口径自动缩到 412 宽、加姓名/日期水印、压成 JPEG q50。</div>
-  </div>
-</div>
-
-<!-- 设置 -->
-<div class="pane" id="pane-setting">
-  <div class="card">
-    <h2>提交设置</h2>
-    <div class="row" style="margin-bottom:8px">
-      <span class="muted" style="width:76px">任务模式</span>
-      <select id="tmode" onchange="paintMode()" style="flex:1">
-        <option value="multiple">多次任务</option>
-        <option value="single">单次任务（即时）</option>
-      </select>
-    </div>
-    <div id="multiOpts">
-      <div class="row" style="margin-bottom:8px">
-        <span class="muted" style="width:76px">提交节奏</span>
-        <input type="number" id="pace" value="2" min="0" max="120" step="1">
-        <span class="muted">秒/条</span>
-      </div>
-    </div>
-    <div id="singleNote" class="hint" style="display:none">单次任务：立即提交，无时间选项、无列队等待。</div>
-    <div class="row" style="margin-top:8px">
-      <span class="muted" style="width:76px">每项照片</span>
-      <select id="perDetail" style="flex:1">
-        <option value="1">1 张（推荐，最快）</option>
-        <option value="2">2 张</option>
-        <option value="3">3 张</option>
-      </select>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <span class="muted" style="width:76px">完成时间</span>
-      <select id="timeMode" style="flex:1">
-        <option value="now">当前时刻</option>
-        <option value="plan">按计划日期当天</option>
-      </select>
-    </div>
-    <div class="hint">完成时间按 App 口径写入点位明细；水印日期取该时间所在日期。</div>
-  </div>
-  <div class="card">
-    <h2>运行时状态</h2>
-    <div class="muted" id="guardInfo">—</div>
-    <div class="row" style="margin-top:10px"><button class="sm" onclick="checkGuard()">重新校验</button>
-      <button class="ghost sm" onclick="clearCache()">清空任务缓存</button></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script src="core.js"></script>
 <script>
 var $ = function(id){ return document.getElementById(id); };
-var S = { session:null, tab:'today', cache:{}, selected:{}, rows:{}, gal:[],
-          pick:new Set(), useMode:'all', busy:false, running:false, stop:false, cfg:{} };
+var S = { session:null, tab:'today', cache:{}, selected:{}, gal:[],
+          pick:new Set(), useMode:'all', busy:false, running:false, stop:false,
+          cfg:{}, templates:{}, tplPick:new Set(), tplCtx:null,
+          page:{today:1,overdue:1}, pageSize:{today:50,overdue:50},
+          sortMode:{today:'recent',overdue:'recent'}, _confirmOK:null };
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 var toastTimer=null;
 function toast(msg){ var t=$('toast'); t.textContent=msg; t.className='toast on';
-  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.className='toast';},2600); }
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.className='toast';},2800); }
 
 // ---- 原生桥 ----
 window.__yyDone = function(id,b64){ YY.nativeDone(id,b64); };
@@ -235,17 +326,23 @@ YY.setBridge(function(action,payload,id){
 });
 function nc(a,p){ return YY.nativeCall(a,p||{}); }
 
-// ---- 配置（记住账号密码）----
+// ---- 配置（账号密码 + 任务模板 + 偏好）----
 function loadCfg(){
   return nc('configGet').then(function(r){
     try{ S.cfg = r.value ? JSON.parse(r.value) : {}; }catch(e){ S.cfg={}; }
-    if(S.cfg.username){ $('user').value=S.cfg.username; }
-    if(S.cfg.password){ $('pwd').value=S.cfg.password; }
+    S.templates = (S.cfg.templates && typeof S.cfg.templates==='object') ? S.cfg.templates : {};
+    if(S.cfg.username) $('user').value=S.cfg.username;
+    if(S.cfg.password) $('pwd').value=S.cfg.password;
     $('remember').checked = S.cfg.remember !== false;
     $('pace').value = S.cfg.pace_sec==null?2:S.cfg.pace_sec;
     $('tmode').value = S.cfg.task_mode||'multiple';
     $('perDetail').value = String(S.cfg.per_detail||1);
     $('timeMode').value = S.cfg.time_mode||'now';
+    var ps=Number(S.cfg.page_size)||50;
+    $('pageSize').value=String(ps);
+    S.pageSize.today=ps; S.pageSize.overdue=ps;
+    if(S.cfg.sort_today) S.sortMode.today=S.cfg.sort_today;
+    if(S.cfg.sort_overdue) S.sortMode.overdue=S.cfg.sort_overdue;
     paintMode();
   }).catch(function(){ paintMode(); });
 }
@@ -257,6 +354,9 @@ function saveCfg(){
   S.cfg.task_mode=$('tmode').value;
   S.cfg.per_detail=Number($('perDetail').value)||1;
   S.cfg.time_mode=$('timeMode').value;
+  S.cfg.page_size=Number($('pageSize').value)||50;
+  S.cfg.sort_today=S.sortMode.today; S.cfg.sort_overdue=S.sortMode.overdue;
+  S.cfg.templates=S.templates;
   return nc('configSet',{value:JSON.stringify(S.cfg)});
 }
 function paintMode(){
@@ -265,27 +365,46 @@ function paintMode(){
   $('singleNote').style.display=single?'block':'none';
 }
 
-// ---- 登录 ----
+// ---- 登录页 / 主界面 ----
+function showLogin(){
+  $('mainUI').style.display='none';
+  $('loginScreen').style.display='flex';
+}
+function enterMain(){
+  $('loginScreen').style.display='none';
+  $('mainUI').style.display='block';
+  renderTasks(); loadGallery(); renderTemplates();
+}
 function doLogin(){
   var u=$('user').value.trim(), p=$('pwd').value;
   if(!u||!p){ toast('请输入账号和密码'); return; }
-  toast('正在登录…');
+  $('loginHint').textContent='正在登录…';
   YY.login(u,p).then(function(s){
     S.session=s;
     $('loginBadge').textContent=s.trueName+' · 已登录';
     $('loginBadge').className='badge on';
-    saveCfg().then(function(){ toast('登录成功 · 账号已记住'); });
-    // 登录后不自动拉取，手动选页签点查询
-  }).catch(function(e){ toast(e.message||'登录失败'); });
+    $('loginHint').textContent='账号密码只保存在本机 App 内，不上传。';
+    saveCfg().catch(function(){});
+    toast('登录成功');
+    enterMain();
+  }).catch(function(e){
+    $('loginHint').textContent='登录失败：'+(e.message||'未知错误');
+    toast(e.message||'登录失败');
+  });
 }
 function doLogout(){
-  S.session=null; S.cache={}; S.selected={}; S.rows={};
+  S.session=null; S.cache={}; S.selected={};
+  S.page.today=1; S.page.overdue=1;
   $('loginBadge').textContent='未登录'; $('loginBadge').className='badge';
-  S.cfg.password=''; S.cfg.username='';
-  nc('configSet',{value:JSON.stringify(S.cfg)});
-  $('pwd').value=''; renderTasks(); toast('已退出');
+  S.cfg.password=''; S.cfg.templates=S.templates;
+  nc('configSet',{value:JSON.stringify(S.cfg)}).catch(function(){});
+  $('pwd').value='';
+  showLogin(); renderTasks(); toast('已退出');
 }
-function needLogin(){ if(!S.session){ toast('请先在顶部登录'); window.scrollTo(0,0); return false; } return true; }
+function needLogin(){
+  if(!S.session){ toast('请先登录'); showLogin(); return false; }
+  return true;
+}
 
 // ---- 页签 ----
 function switchTab(p){
@@ -295,10 +414,11 @@ function switchTab(p){
   var ps=document.querySelectorAll('.pane');
   for(var j=0;j<ps.length;j++) ps[j].className='pane'+(ps[j].id==='pane-'+p?' show':'');
   if(p==='gallery') loadGallery();
+  else if(p==='template') renderTemplates();
   else if(p==='today'||p==='overdue') renderTasks();
 }
 
-// ---- 任务 ----
+// ---- 任务列表骨架 ----
 function taskBoxHtml(scope){
   var lbl = scope==='today'?'今日任务':'逾期任务';
   return '<div class="card"><h2>'+lbl+'</h2>'+
@@ -309,12 +429,17 @@ function taskBoxHtml(scope){
       '<button class="sm" onclick="doRefresh(\''+scope+'\')">重扫</button>'+
     '</div>'+
     '<div class="row" style="margin-bottom:8px">'+
-      '<input type="text" id="kw_'+scope+'" placeholder="搜索任务名 / 编号 / 日期" oninput="renderTasks()">'+
-      '<button class="ghost sm" onclick="selAll(\''+scope+'\',true)">全选</button>'+
-      '<button class="ghost sm" onclick="selAll(\''+scope+'\',false)">清空</button>'+
+      '<input type="text" id="kw_'+scope+'" placeholder="搜索任务名 / 编号 / 日期" oninput="onSearch(\''+scope+'\')">'+
+      '<button class="sm" id="sortBtn_'+scope+'" onclick="toggleSort(\''+scope+'\')">▼ 近期超时优先</button>'+
+    '</div>'+
+    '<div class="row" style="margin-bottom:8px">'+
+      '<button class="ghost sm" onclick="selectPage(\''+scope+'\')">全选本页</button>'+
+      '<button class="ghost sm" onclick="selectAll(\''+scope+'\')">全选全部</button>'+
+      '<button class="ghost sm" onclick="clearSel(\''+scope+'\')">清空选择</button>'+
     '</div>'+
     '<div class="bar" id="bar_'+scope+'">未查询。选择类型后点「查询'+lbl+'」。</div>'+
     '<div id="list_'+scope+'"></div>'+
+    '<div class="pager" id="pager_'+scope+'"></div>'+
     '<div class="foot"><button class="ok" onclick="doRun(\''+scope+'\')">完成选中任务</button>'+
     '<button class="danger" onclick="stopRun()" id="stopBtn_'+scope+'" disabled>停止</button></div>'+
     '</div>'+
@@ -339,40 +464,78 @@ function doRefresh(scope){
   if(!needLogin()) return;
   if(S.busy){ toast('正在扫描，请稍候'); return; }
   S.busy=true;
-  var bar=$('bar_'+scope), typ=$('typ_'+scope).value, n=0;
+  var bar=$('bar_'+scope), typ=$('typ_'+scope).value;
   bar.textContent='正在扫描全表…（任务多时首次较慢，结果会缓存）';
-  YY.fetchAll(S.session,typ,function(cnt,total){ n=cnt;
+  YY.fetchAll(S.session,typ,function(cnt,total){
     bar.textContent='正在扫描全表…已取 '+cnt+' 条'+(total?(' / 共约 '+total):'');
   }).then(function(c){
     S.cache[cacheKey(scope)]=c; S.busy=false;
-    renderTasks(); toast('扫描完成 · '+c.rows.length+' 条，已缓存');
+    S.page[scope]=1; renderTasks(); toast('扫描完成 · '+c.rows.length+' 条，已缓存');
   }).catch(function(e){ S.busy=false;
     bar.textContent='扫描失败：'+esc(e.message);
     if(e.sessionExpired){ S.session=null; $('loginBadge').textContent='登录已失效';
-      $('loginBadge').className='badge'; }
+      $('loginBadge').className='badge'; showLogin(); }
     toast(e.message); });
 }
-function clearCache(){ S.cache={}; toast('任务缓存已清空'); }
+function clearCache(){ S.cache={}; toast('任务缓存已清空'); renderTasks(); }
 
+// ---- 过滤 / 排序 / 分页 ----
 var submittedSet={};
-function visibleRows(scope){
-  var key=cacheKey(scope), c=S.cache[key];
+function allRows(scope){
+  var c=S.cache[cacheKey(scope)];
   if(!c) return null;
   var kw=$('kw_'+scope)?$('kw_'+scope).value:'';
-  // 已完成的任务从列表和计数里剔除，不再提示
   var alive=c.rows.filter(function(r){ return !submittedSet[scope+'|'+r.taskId]; });
-  return YY.filterRows(alive,scope,kw);
+  return YY.sortRows(YY.filterRows(alive,scope,kw), S.sortMode[scope]);
+}
+function pageOf(scope){
+  var rows=allRows(scope);
+  return rows ? YY.paginate(rows,S.page[scope],S.pageSize[scope]) : null;
+}
+function onSearch(scope){ S.page[scope]=1; renderTasks(); }
+function toggleSort(scope){
+  S.sortMode[scope] = S.sortMode[scope]==='recent' ? 'oldest' : 'recent';
+  S.page[scope]=1;
+  $('sortBtn_'+scope).textContent = S.sortMode[scope]==='recent' ? '▼ 近期超时优先' : '▲ 早期超时优先';
+  $('sortBtn_'+scope).className = S.sortMode[scope]==='recent' ? 'sm primary' : 'sm warn';
+  saveCfg().catch(function(){});
+  renderTasks();
+  toast(S.sortMode[scope]==='recent'?'近期超时在前':'早期超时在前');
+}
+function goPage(scope,d){ S.page[scope]=Math.max(1,S.page[scope]+d); renderTasks(); }
+function jumpPage(scope,v){
+  var p=parseInt(v,10);
+  if(isNaN(p)) return;
+  S.page[scope]=p; renderTasks();
+}
+function setAllPageSize(v){
+  var n=Number(v)||50;
+  S.pageSize.today=n; S.pageSize.overdue=n;
+  S.page.today=1; S.page.overdue=1;
+  saveCfg().catch(function(){});
+  renderTasks();
 }
 function selKey(scope,id){ return scope+'|'+id; }
-function selAll(scope,on){
-  var rows=visibleRows(scope)||[];
-  rows.forEach(function(r){ if(on) S.selected[selKey(scope,r.taskId)]=r; else delete S.selected[selKey(scope,r.taskId)]; });
+function selectPage(scope){
+  var pg=pageOf(scope);
+  if(!pg){ toast('请先查询任务'); return; }
+  pg.rows.forEach(function(r){ S.selected[selKey(scope,r.taskId)]=r; });
+  renderTasks(); toast('已选本页 '+pg.rows.length+' 条');
+}
+function selectAll(scope){
+  var rows=allRows(scope);
+  if(!rows){ toast('请先查询任务'); return; }
+  rows.forEach(function(r){ S.selected[selKey(scope,r.taskId)]=r; });
+  renderTasks(); toast('已选全部 '+rows.length+' 条');
+}
+function clearSel(scope){
+  Object.keys(S.selected).forEach(function(k){ if(k.indexOf(scope+'|')===0) delete S.selected[k]; });
   renderTasks();
 }
 function toggleSel(scope,id){
   var k=selKey(scope,id);
   if(S.selected[k]) delete S.selected[k];
-  else { var rows=visibleRows(scope)||[];
+  else { var rows=allRows(scope)||[];
     for(var i=0;i<rows.length;i++) if(rows[i].taskId===id){ S.selected[k]=rows[i]; break; } }
   renderTasks();
 }
@@ -381,22 +544,106 @@ function catTag(c){ var m={today:['今日','today'],overdue:['逾期','overdue']
   return '<span class="tag '+x[1]+'">'+x[0]+'</span>'; }
 function renderTasks(){
   ['today','overdue'].forEach(function(scope){
-    var rows=visibleRows(scope), box=$('list_'+scope), bar=$('bar_'+scope);
-    if(!rows){ box.innerHTML='<div class="empty">尚未查询。点上方「查询」拉取任务。</div>'; return; }
-    var selN=0, html='';
-    rows.forEach(function(r){
+    var pg=pageOf(scope), box=$('list_'+scope), bar=$('bar_'+scope), pager=$('pager_'+scope);
+    var btn=$('sortBtn_'+scope);
+    if(btn){ btn.textContent = S.sortMode[scope]==='recent'?'▼ 近期超时优先':'▲ 早期超时优先';
+      btn.className = S.sortMode[scope]==='recent'?'sm primary':'sm warn'; }
+    if(!pg){ box.innerHTML='<div class="empty">尚未查询。点上方「查询」拉取任务。</div>';
+      pager.innerHTML=''; return; }
+    S.page[scope]=pg.page;
+    var html='';
+    pg.rows.forEach(function(r){
       var k=selKey(scope,r.taskId), on=!!S.selected[k];
-      if(on) selN++;
+      var n=YY.templateImgs(S.templates,r.name).length;
       html+='<div class="task"><input class="cb" type="checkbox" '+(on?'checked':'')+
         ' onchange="toggleSel(\''+scope+'\',\''+esc(r.taskId)+'\')">'+
-        '<div class="info"><div class="nm">'+catTag(r.category)+esc(r.name||'(无名称)')+'</div>'+
+        '<div class="info"><div class="nm">'+catTag(r.category)+esc(r.name||'(无名称)')+
+        (n?'<span class="tplbadge">固定图 '+n+' 张</span>':'')+'</div>'+
         '<div class="meta">'+esc(r.planStart)+' · '+esc(r.taskId)+
-        (r.delay!==''&&r.delay!=null?(' · 逾期 '+esc(r.delay)+' 天'):'')+'</div></div></div>';
+        (r.delay!==''&&r.delay!=null?(' · 逾期 '+esc(r.delay)+' 天'):'')+'</div>'+
+        '<button class="ghost sm" style="margin-top:6px;min-height:28px" onclick="openTpl(\''+scope+'\',\''+esc(r.taskId)+'\')">配图 / 改模板</button>'+
+        '</div></div>';
     });
-    box.innerHTML = rows.length?html:'<div class="empty">该范围内没有任务</div>';
-    bar.innerHTML='<b>'+(scope==='today'?'今日任务':'逾期任务')+'</b>：共 '+rows.length+
-      ' 条 · 已选 <b>'+selN+'</b> 条 · 扫描 '+S.cache[cacheKey(scope)].rows.length+
-      ' 条 <span class="muted">（'+esc(S.cache[cacheKey(scope)].fetchedAt)+'）</span>';
+    box.innerHTML = pg.rows.length?html:'<div class="empty">该范围内没有任务</div>';
+    var c=S.cache[cacheKey(scope)], selN=Object.keys(S.selected).filter(function(k){return k.indexOf(scope+'|')===0;}).length;
+    bar.innerHTML='<b>'+(scope==='today'?'今日任务':'逾期任务')+'</b>：筛选后 '+pg.total+
+      ' 条 · 第 '+pg.page+'/'+pg.pages+' 页（显示 '+(pg.total?pg.start+1:0)+'–'+pg.end+'）'+
+      ' · 已选 <b>'+selN+'</b> 条 · 扫描 '+c.rows.length+' 条'+
+      '<br><span class="muted">'+(S.sortMode[scope]==='recent'?'近期超时在前':'早期超时在前')+
+      ' · 缓存于 '+esc(c.fetchedAt)+'</span>';
+    pager.innerHTML=
+      '<button class="sm" onclick="goPage(\''+scope+'\',-1)" '+(pg.page<=1?'disabled':'')+'>上一页</button>'+
+      '<span class="pn">'+pg.page+' / '+pg.pages+'</span>'+
+      '<button class="sm" onclick="goPage(\''+scope+'\',1)" '+(pg.page>=pg.pages?'disabled':'')+'>下一页</button>'+
+      '<select onchange="jumpPage(\''+scope+'\',this.value)" style="max-width:110px">'+
+        (function(){ var o=''; for(var i=1;i<=pg.pages;i++) o+='<option value="'+i+'"'+(i===pg.page?' selected':'')+'>第 '+i+' 页</option>'; return o; })()+
+      '</select>'+
+      '<span class="pn">共 '+pg.total+' 条</span>';
+  });
+}
+
+// ---- 任务模板 ----
+function findRow(scope,id){
+  var rows=allRows(scope)||[], r=null;
+  for(var i=0;i<rows.length;i++) if(rows[i].taskId===id){ r=rows[i]; break; }
+  return r;
+}
+function openTpl(scope,id){
+  var r=findRow(scope,id);
+  if(!r){ toast('任务不在当前列表'); return; }
+  var key=YY.taskKey(r.name||r.taskId);
+  S.tplCtx={scope:scope,id:id,key:key,name:r.name};
+  S.tplPick=new Set(YY.templateImgs(S.templates,r.name));
+  $('tplTaskName').textContent=r.name+'  →  '+key;
+  $('tplMask').style.display='flex';
+  renderTplGrid();
+}
+function closeTpl(){ $('tplMask').style.display='none'; S.tplCtx=null; }
+function renderTplGrid(){
+  var html='';
+  S.gal.forEach(function(it){
+    var on=S.tplPick.has(it.id), safe=it.id.replace(/[^A-Za-z0-9_-]/g,'_');
+    html+='<div class="gi'+(on?' pick':'')+'" onclick="toggleTplPick(\''+esc(it.id)+'\')">'+
+      '<img id="tp_'+safe+'" alt="">'+
+      '<div class="cap">'+(on?'✓ ':'')+esc(it.name)+'</div></div>';
+  });
+  $('tplGrid').innerHTML=html||'<div class="empty">图库为空，请先到「图库」添加照片</div>';
+  S.gal.forEach(function(it){ thumb(it.id).then(function(u){
+    var el=$('tp_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_')); if(el&&u) el.src=u; }); });
+}
+function toggleTplPick(id){
+  if(S.tplPick.has(id)) S.tplPick.delete(id); else S.tplPick.add(id);
+  renderTplGrid();
+}
+function saveTpl(){
+  if(!S.tplCtx){ closeTpl(); return; }
+  var valid={}; S.gal.forEach(function(it){ valid[it.id]=1; });
+  var imgs=Array.from(S.tplPick).filter(function(i){ return valid[i]; }).slice(0,3);
+  if(imgs.length) S.templates[S.tplCtx.key]={name:S.tplCtx.name,imgs:imgs,ts:YY.nowStr()};
+  else delete S.templates[S.tplCtx.key];
+  S.cfg.templates=S.templates;
+  saveCfg().catch(function(){});
+  closeTpl(); renderTasks(); renderTemplates();
+  toast(imgs.length?('已绑定 '+imgs.length+' 张固定图'):'已取消该任务绑定');
+}
+function renderTemplates(){
+  var keys=Object.keys(S.templates);
+  $('tplCount').textContent=keys.length+' 条';
+  var box=$('tplList'), html='';
+  keys.forEach(function(k){
+    var rec=S.templates[k]||{}, n=(rec.imgs||[]).length;
+    html+='<div class="tpl-item"><div class="info"><div class="k">'+esc(k)+'</div>'+
+      '<div class="muted">'+n+' 张固定图 · '+esc(rec.ts||'')+'</div></div>'+
+      '<button class="ghost sm" onclick="delTpl(\''+esc(k)+'\')">删除</button></div>';
+  });
+  box.innerHTML=html||'<div class="empty">还没有模板。到任务列表点「配图 / 改模板」绑定。</div>';
+}
+function delTpl(key){ delete S.templates[key]; S.cfg.templates=S.templates;
+  saveCfg().catch(function(){}); renderTasks(); renderTemplates(); toast('已删除模板'); }
+function clearTpls(){
+  askConfirm('确定清空全部任务图片模板？任务会退回使用「默认用图」设置。',function(){
+    S.templates={}; S.cfg.templates={}; saveCfg().catch(function(){});
+    renderTasks(); renderTemplates(); toast('全部模板已清空');
   });
 }
 
@@ -409,12 +656,11 @@ function loadGallery(){
     var grid=$('galGrid'), html='';
     S.gal.forEach(function(it){
       html+='<div class="gi"><button class="del" onclick="delGal(\''+esc(it.id)+'\')">×</button>'+
-        '<img id="gi_'+esc(it.id).replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
+        '<img id="gi_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
         '<div class="cap">'+esc(it.name)+(it.builtin?'':' · 新增')+'</div></div>';
     });
     grid.innerHTML=html;
     $('galEmpty').style.display=S.gal.length?'none':'block';
-    // 逐张取缩略图（base64 直接作为 dataURL）
     S.gal.forEach(function(it){
       thumb(it.id).then(function(url){
         var el=$('gi_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_'));
@@ -473,7 +719,7 @@ function renderPick(){
   S.gal.forEach(function(it){
     var on=S.pick.has(it.id);
     html+='<div class="gi" onclick="togglePick(\''+esc(it.id)+'\')" style="outline:'+(on?'2px solid var(--accent)':'none')+'">'+
-      '<img id="pk_'+esc(it.id).replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
+      '<img id="pk_'+it.id.replace(/[^A-Za-z0-9_-]/g,'_')+'" alt="">'+
       '<div class="cap">'+(on?'✓ ':'')+esc(it.name)+'</div></div>';
   });
   $('pickGrid').innerHTML=html||'<div class="empty">图库为空</div>';
@@ -482,10 +728,16 @@ function renderPick(){
 }
 function togglePick(id){ if(S.pick.has(id)) S.pick.delete(id); else S.pick.add(id); renderPick(); }
 
-// ---- 照片准备（水印 + 压缩）----
-function preparePhotos(when){
-  if(S.useMode==='none') return Promise.resolve([]);
-  var ids = S.useMode==='pick' ? Array.from(S.pick) : S.gal.map(function(x){return x.id;});
+// ---- 照片准备（模板优先 + 水印 + 压缩）----
+function preparePhotos(when,task){
+  var ids=YY.templateImgs(S.templates,task?task.name:'');
+  var usedTpl=ids.length>0;
+  if(!usedTpl){
+    if(S.useMode==='none') return Promise.resolve([]);
+    ids = S.useMode==='pick' ? Array.from(S.pick) : S.gal.map(function(x){return x.id;});
+  }
+  var valid={}; S.gal.forEach(function(it){ valid[it.id]=1; });
+  ids=ids.filter(function(i){ return valid[i]; });
   if(!ids.length) return Promise.resolve([]);
   var name=S.session?S.session.trueName:'';
   return Promise.all(ids.map(function(id){
@@ -501,6 +753,16 @@ function preparePhotos(when){
   })).then(function(a){ return a.filter(Boolean); });
 }
 
+// ---- 自定义确认浮层（WKWebView 里原生 confirm 会被吞，必须自己画）----
+function askConfirm(msg,onOK){
+  $('confirmMsg').textContent=msg;
+  S._confirmOK=onOK;
+  $('confirmMask').style.display='flex';
+}
+function confirmOK(){ var f=S._confirmOK; S._confirmOK=null;
+  $('confirmMask').style.display='none'; if(f) f(); }
+function confirmCancel(){ S._confirmOK=null; $('confirmMask').style.display='none'; }
+
 // ---- 执行 ----
 function planFinish(r){
   if($('timeMode').value==='plan'){
@@ -515,12 +777,18 @@ function doRun(scope){
   if(S.running){ toast('已有任务在执行'); return; }
   var items=Object.keys(S.selected).filter(function(k){return k.indexOf(scope+'|')===0;})
     .map(function(k){return S.selected[k];});
-  if(!items.length){ toast('请先勾选任务'); return; }
+  if(!items.length){ toast('请先勾选任务（可用「全选本页」）'); return; }
   var single=$('tmode').value==='single';
   var pace=single?0:(Number($('pace').value)||0);
   var per=Number($('perDetail').value)||1;
-  if(!confirm('确认完成 '+items.length+' 条'+(scope==='today'?'今日':'逾期')+'任务？'+
-    (single?'（单次任务 · 即时执行）':'（间隔 '+pace+' 秒/条）'))){ return; }
+  var tplN=items.filter(function(r){ return YY.templateImgs(S.templates,r.name).length>0; }).length;
+  askConfirm('确认完成 '+items.length+' 条'+(scope==='today'?'今日':'逾期')+'任务？'+
+    (single?'（单次任务 · 即时执行）':'（间隔 '+pace+' 秒/条）')+
+    (tplN?('\n其中 '+tplN+' 条使用任务模板固定图'):''),function(){
+    startRun(scope,items,single,pace,per);
+  });
+}
+function startRun(scope,items,single,pace,per){
   S.running=true; S.stop=false;
   ['today','overdue'].forEach(function(s){ $('stopBtn_'+s).disabled=false; });
   var prog=$('prog_'+scope), cd=$('cd_'+scope), pbar=$('pbar_'+scope);
@@ -542,14 +810,14 @@ function doRun(scope){
         if(left<=0){ clearInterval(cdTimer); cd.textContent=''; go(); }
       },250);
       tick('等待列队节奏 · 第 '+idx+'/'+items.length+' 条');
-      return; // 倒计时结束后 go()
+      return;
     }
     go();
     function go(){
       if(S.stop){ finish(); return; }
       tick('正在完成第 '+idx+'/'+items.length+' 条 · '+r.taskId);
       var when=planFinish(r);
-      preparePhotos(when).then(function(photos){
+      preparePhotos(when,r).then(function(photos){
         return YY.submitOne(S.session,$('typ_'+scope).value,r.taskId,when,photos,per);
       }).then(function(res){
         if(res.ok){ done++; submittedSet[scope+'|'+r.taskId]=true; }
@@ -559,7 +827,8 @@ function doRun(scope){
         loop();
       }).catch(function(e){
         fail++; i++;
-        if(e.sessionExpired){ S.session=null; $('loginBadge').textContent='登录已失效'; $('loginBadge').className='badge'; }
+        if(e.sessionExpired){ S.session=null; $('loginBadge').textContent='登录已失效';
+          $('loginBadge').className='badge'; showLogin(); }
         toast('第 '+idx+' 条失败：'+esc(e.message));
         tick('第 '+idx+' 条失败'); loop();
       });
@@ -595,9 +864,10 @@ function checkGuard(){
 }
 function retryGuard(){ $('stopped').style.display='none'; $('boot').style.display='flex'; checkGuard(); }
 
-// ---- 启动 ----
+// ---- 启动：校验完停在登录页，登录成功才进主界面 ----
 loadCfg().then(function(){ return checkGuard(); }).then(function(){
-  renderTasks(); loadGallery();
+  showLogin();
+  renderTasks(); renderTemplates();
 });
 </script>
 </body>

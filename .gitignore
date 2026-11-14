@@ -9,11 +9,13 @@ xcuserdata/
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
 
+# XcodeGen 生成的工程（每次构建自动重建，不入库）
+*.xcodeproj/
+
 # 构建产物
 *.ipa
 *.app
 Payload/
-build_ipa_xcodegen/
 
 # Python
 __pycache__/
@@ -25,6 +27,3 @@ node_modules/
 # 临时文件
 *.log
 *.tmp
-
-# XcodeGen 生成的工程（每次构建自动重建，不入库）
-*.xcodeproj/

@@ -87,8 +87,13 @@ else
   cp -R "$ROOT/YuyueAssistant/Resources/gallery" "$APP/gallery"
 fi
 
+# 两条构建路径都补一份裸图标，保证 TrollStore 安装后桌面有图标
+for f in Icon.png Icon-120.png Icon-152.png Icon-167.png; do
+  if [ ! -f "$APP/$f" ]; then cp "$ROOT/YuyueAssistant/Resources/$f" "$APP/$f"; fi
+done
+
 echo "=== 3/5 校验资源 ==="
-for f in "$APP/$APPNAME" "$APP/Info.plist" "$APP/www/index.html" "$APP/www/core.js"; do
+for f in "$APP/$APPNAME" "$APP/Info.plist" "$APP/www/index.html" "$APP/www/core.js" "$APP/Icon.png"; do
   if [ ! -f "$f" ]; then
     echo "错误：缺少 $f" >&2
     echo "--- .app 实际内容 ---" >&2

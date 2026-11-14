@@ -6,13 +6,33 @@
 
 一、功能
 ---------------------------------------------------------
-1. 登录并记住账号密码（默认勾选，只存在本机 App 内，重启自动填）
-2. 今日任务：查询 → 勾选 → 完成
-3. 逾期任务：查询 → 勾选 → 完成
+1. 桌面图标：取自原 APK 的「uyo」金色标，已生成全套 iOS 尺寸，
+   打包后巨魔安装即可在桌面看到（Xcode 走 Assets.car，swiftc 走 Icon.png 兜底）。
+
+2. 启动流程：先显示【登录页】→ 输入账号密码 → 点「登录」→ 才进入主界面。
+   - 记住账号密码默认勾选，重启自动填好，但不会自动登录（每次要先登录）
+   - 账号密码只存在本机 App 内，不上传
+   - 顶部「退出」会回到登录页
+
+3. 今日任务 / 逾期任务：查询 → 勾选 → 完成
    - 今日 / 逾期严格互斥，不会再出现「今日任务里混进逾期」
    - 已完成的任务自动从列表消失，不再提示
-   - 全表扫描一次后缓存，翻页/切页签/搜索不再重复扫
-4. 软件图库（重点）
+   - 全表扫描一次后缓存，翻页/排序/切页签/搜索不再重复扫
+   - 【分页】1000+ 条不会一次铺一页：默认每页 50 条，可设 20/50/100/200，
+     有「上一页 / 下一页 / 跳页」；全选分「全选本页」和「全选全部」，避免误选一千条
+   - 【排序】默认「▼ 近期超时优先」，点一下切「▲ 早期超时优先」，
+     排序作用于筛选后的全量结果再分页，状态会被记住
+
+4. 任务图片模板（★ 每个今日任务固定图片）
+   - 在任务列表每条下方点「配图 / 改模板」→ 从图库勾选照片 → 保存
+   - 模板按【任务名】存，自动去掉尾部日期：
+       「…排烟风机巡检A4_每日_2026-11-06 08:00:00」→「…排烟风机巡检A4_每日」
+     所以配一次，以后每天的同类任务自动套用，不用天天重绑
+   - 任务行会显示「固定图 N 张」；「模板」页签可查看 / 删除 / 清空
+   - 提交时【模板优先】：绑了模板就用模板图，没绑才用图库页的「默认用图」设置
+   - 模板与账号一起存本机，卸载 App 才会丢
+
+5. 软件图库
    - 【打包时增删】直接编辑 YuyueAssistant/Resources/gallery/ 目录：
        加图 = 把 jpg / png 拷进去
        删图 = 把文件删掉
@@ -21,26 +41,33 @@
        App 内「图库」页 → ＋添加照片（从相册多选）/ 缩略图右上角 × 删除
        内置图删掉后可点「恢复内置图」找回
        也能在 iOS「文件」App 里直接操作 愉悦助手/Documents/gallery
-   - 提交用图可选：图库全部 / 手动挑图 / 不配图
+   - 未绑模板时的默认用图：图库全部 / 手动挑图 / 不配图
    - 提交前自动按原 App 口径处理图：缩到 412 宽 + 姓名/日期水印 + JPEG q50
-5. 提交设置
+
+6. 提交设置
    - 单次任务（即时执行，无时间选项）/ 多次任务（可设提交节奏，秒/条）
    - 多条任务：先提交第一条，其余列队 + 下一个任务倒计时 + 随时「停止」
    - 完成时间可选「当前时刻」或「按计划日期当天」
    - 每个检查项挂 1~3 张照片（默认 1 张，最快）
 
-界面按「今日 / 逾期 / 图库 / 设置」四个页签，登录后不自动拉取，
+界面按「今日 / 逾期 / 图库 / 模板 / 设置」五个页签，登录后不自动拉取，
 选好页签点「查询」才拉任务。
 
+【本次修复】点「完成选中任务」以前没反应：原因是前端用了浏览器原生 confirm()，
+而 WKWebView 没实现弹窗代理，弹窗被静默取消、函数直接返回。
+现在改成 App 内自定义确认浮层（并补了原生 WKUIDelegate 兜底），
+取消 / 确定 / 未勾选 / 未登录 / 失败 都会有明确提示。
 
-二、怎么拿到能装的 IPA（本机是 Windows，编译这步还没跑）
+
+二、怎么拿到能装的 IPA（编译在 macOS / 云端完成）
 ---------------------------------------------------------
 IPA 必须是 arm64 的 iOS 可执行文件，编译和签名只能在 macOS + Xcode 上做。
-本机 Windows 没有 Xcode / iOS SDK / codesign，所以【IPA 二进制：未执行】。
+本机 Windows 没有 Xcode / iOS SDK / codesign，所以【在本机编译：未执行】。
 源码、资源、打包脚本、验证都已就绪，任选下面一条即可出包：
 
 【方式 A｜推荐，不用 Mac】用免费的 GitHub Actions macOS 构建机
-  1. 把整个「愉悦助手_iOS」文件夹传到一个 GitHub 仓库（新建私有仓库即可）
+  1. 把整个「愉悦助手_iOS」文件夹（或 GitHub上传_愉悦助手 里的内容）
+     传到一个 GitHub 仓库根目录
   2. 仓库 → Actions → 「构建愉悦助手 IPA」→ Run workflow
   3. 跑完在 Artifacts 里下载「愉悦助手-IPA」→ 得到 愉悦助手.ipa
   工作流已配好 .github/workflows/build-ipa.yml，会自动装 XcodeGen、编译、
@@ -58,12 +85,13 @@ IPA 必须是 arm64 的 iOS 可执行文件，编译和签名只能在 macOS + X
 【安装到手机】
   把 愉悦助手.ipa 传到 iPhone → 用「文件」App 点开 → 共享给 TrollStore → 安装。
   巨魔会在安装时重新签名，脚本里的 ad-hoc 占位签名够用。
+  改过代码 / 图库 / 图标后要重新出包再装一次，图标才会刷新。
 
 
 三、为什么不是把两个 exe / 那个 APK 直接塞进 IPA
 ---------------------------------------------------------
 - 愉悦服务_2.6.0_拍照可选.apk 是 Android 包（classes.dex + arm 的 .so），
-  iOS 无法执行；按你的要求已排除。
+  iOS 无法执行；按你的要求已排除，但【图标取自这个 APK】。
 - 巡检配图工具.exe / 超时任务清理工具.exe 是 Windows PE + Python 字节码，
   iOS 同样无法执行。
 所以做法是把两只工具的【业务逻辑完整重写】成 iOS 原生壳 + 网页界面：
@@ -71,6 +99,7 @@ IPA 必须是 arm64 的 iOS 可执行文件，编译和签名只能在 macOS + X
   前端 JS 负责登录、任务分类、点位组装、水印压缩、提交。
 接口契约与 Windows 版逐项对齐（登录 b64、token、taskState=2、
 checkDeatilList 全部正常、multipart 字段、水印 412px/#CEA048/q50）。
+任务模板的 key 规则与配图工具 app.py 的 task_key() 完全一致。
 
 运行时密钥校验（读 heartbeat.key → HMAC 校验 → 解出提交接口路径）
 也按原机制完整移植到 Swift，没有写死接口路径、没有绕过校验。
@@ -83,29 +112,36 @@ checkDeatilList 全部正常、multipart 字段、水印 412px/#CEA048/q50）。
   - 核心逻辑离线自测 60 项全通过
     （登录编码、今日/逾期严格分类、分页去重、点位组装、multipart、
       提交全链路、校验失败拒绝提交、时间工具、排序）
+  - 本轮新增能力自测 40 项全通过（selftest_features.js）
+    （任务模板 key 与 Python 版一致、跨天同 key、1037 条分页只渲染 50 条、
+      越界页码钳制、近期/早期排序组合、模板命中与副本隔离）
   - guard 移植对照自测 16 项全通过
     （从 Swift 源码抽常量独立复刻，解出的两个路径与 Windows 版一致：
      downloadTodoTasks.jhtml / uploadTask.jhtml）
-  - 前端 JS 语法校验、事件函数/id 引用完整性检查、两个 plist 合法性校验
+  - 前端 JS 语法校验、事件函数/id 引用完整性检查、Swift 静态检查
+  - 两个 plist 合法性、build_ipa.sh shell 语法
+  - AppIcon 全套 18 个尺寸 PNG 与 Contents.json 引用逐项核对无缺失
   - 45 张初始图库照片已放入工程
 
-未执行（需要 macOS 或云端构建机）：
-  - swiftc / xcodebuild 实际编译 arm64 Mach-O
-  - codesign 签名、IPA 打包、真机安装与实网提交
+未在本机执行（需要 macOS 或云端构建机）：
+  - swiftc / xcodebuild 实际编译 arm64 Mach-O、签名、IPA 打包
+  - 真机安装后的图标显示、实网提交
   => 按上面【方式 A】跑一次云端构建即可补齐；构建日志会明确报成功/失败。
      真机首次使用建议先只勾选 1 条任务试提交，确认平台收下了再批量。
 
 
 五、目录
 ---------------------------------------------------------
-  YuyueAssistant/App.swift             App 入口 + WKWebView 容器
+  YuyueAssistant/App.swift             App 入口 + WKWebView + 弹窗代理
   YuyueAssistant/NativeAPI.swift       HTTP 代发 / 图库增删 / 配置存储
   YuyueAssistant/Guard.swift           运行时密钥校验 + 提交路径解封
-  YuyueAssistant/Info.plist            Bundle 配置（含文件共享、ATS）
+  YuyueAssistant/Info.plist            Bundle 配置（含图标、文件共享、ATS）
   YuyueAssistant/Resources/www/        前端页面（index.html + core.js）
   YuyueAssistant/Resources/gallery/    ★ 打包图库，可自由增删图片
+  YuyueAssistant/Resources/Assets.xcassets/AppIcon.appiconset/   ★ iOS 图标
+  YuyueAssistant/Resources/Icon*.png   图标兜底（swiftc 路径用）
   project.yml                          XcodeGen 工程描述
   Entitlements.plist                   巨魔安装用 entitlements
   build_ipa.sh                         一键出包脚本（macOS）
   .github/workflows/build-ipa.yml      云端免费构建
-  verify/                              离线自测脚本
+  verify/                              离线自测脚本（含 selftest_features.js）
