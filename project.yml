@@ -15,6 +15,9 @@ targets:
         excludes:
           - "Resources/**"
           - "Info.plist"
+      # Assets.xcassets 必须走 sources 才会被 actool 编进 Assets.car；
+      # 放在 resources 里会被当成普通文件处理，产不出 Assets.car。
+      - path: YuyueAssistant/Resources/Assets.xcassets
     resources:
       - path: YuyueAssistant/Resources/www
         type: folder
@@ -22,7 +25,6 @@ targets:
       - path: YuyueAssistant/Resources/gallery
         type: folder
         buildPhase: resources
-      - path: YuyueAssistant/Resources/Assets.xcassets
       - path: YuyueAssistant/Resources/Icon.png
       - path: YuyueAssistant/Resources/Icon-120.png
       - path: YuyueAssistant/Resources/Icon-152.png
